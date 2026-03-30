@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CallLink — Video & Voice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-database-compat.min.js"></script>
+<style>
+:root{
+  --bg:#0d0f14;--surface:#161a23;--surface2:#1e2330;--surface3:#252b3b;
+  --border:rgba(255,255,255,0.07);--accent:#3b82f6;--accent2:#10b981;
+  --danger:#ef4444;--warn:#f59e0b;--text:#e8eaf0;--dim:#6b7280;--radius:14px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 14px 60px;background-image:linear-gradient(rgba(59,130,246,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.03) 1px,transparent 1px);background-size:40px 40px;}
+
+/* HEADER */
+header{width:100%;max-width:960px;display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.logo{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;letter-spacing:-.5px;}
+.logo span{color:var(--accent);}
+.logo-sub{font-size:.62rem;color:var(--dim);letter-spacing:1px;margin-top:2px;}
+.logo-sub .s{color:var(--accent);font-weight:500;}
+.logo-sub .a{color:var(--accent2);font-weight:500;}
+#status-badge{display:flex;align-items:center;gap:7px;padding:5px 13px;background:var(--surface);border:1px solid var(--border);border-radius:999px;font-size:.74rem;font-weight:500;}
+#status-dot{width:8px;height:8px;border-radius:50%;background:var(--dim);transition:background .3s;}
+#status-badge.connecting #status-dot{background:var(--warn);animation:pdot 1s infinite;}
+#status-badge.connected  #status-dot{background:var(--accent2);}
+#status-badge.disconnected #status-dot{background:var(--danger);}
+@keyframes pdot{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* SETUP */
+.setup-panel{width:100%;max-width:960px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:12px;}
+.setup-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
+.field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:140px;}
+label{font-size:.68rem;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--dim);}
+input[type=text],input[type=password]{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;padding:9px 12px;outline:none;width:100%;transition:border-color .2s;}
+input:focus{border-color:var(--accent);}
+input::placeholder{color:var(--dim);}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.83rem;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.btn:disabled{opacity:.3;cursor:not-allowed;}
+.btn:not(:disabled):hover{transform:translateY(-1px);filter:brightness(1.12);}
+.btn:not(:disabled):active{transform:translateY(0);}
+.btn-success{background:var(--accent2);color:#fff;}
+.btn-warn{background:var(--warn);color:#000;}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-active{background:rgba(59,130,246,.2);color:var(--accent);border:1px solid var(--accent);}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-icon{padding:8px 11px;font-size:1rem;}
+
+/* ACTIONS */
+.actions{width:100%;max-width:960px;display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+
+/* IN-CALL CONTROLS */
+#call-controls{display:none;width:100%;max-width:960px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:12px;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;}
+#call-controls.show{display:flex;}
+.ctrl-group{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+#call-timer{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:600;color:var(--accent2);letter-spacing:2px;min-width:60px;text-align:center;}
+
+/* Net quality bars */
+#net-quality{display:flex;align-items:flex-end;gap:2px;height:18px;}
+#net-quality span{display:block;width:4px;border-radius:1px;transition:background .5s;}
+#net-quality span:nth-child(1){height:5px;background:var(--dim);}
+#net-quality span:nth-child(2){height:9px;background:var(--dim);}
+#net-quality span:nth-child(3){height:13px;background:var(--dim);}
+#net-quality span:nth-child(4){height:17px;background:var(--dim);}
+#net-quality.good span{background:var(--accent2);}
+#net-quality.medium span:nth-child(1),
+#net-quality.medium span:nth-child(2),
+#net-quality.medium span:nth-child(3){background:var(--warn);}
+#net-quality.medium span:nth-child(4){background:var(--dim);}
+#net-quality.poor span:nth-child(1){background:var(--danger);}
+#net-quality.poor span:nth-child(2),
+#net-quality.poor span:nth-child(3),
+#net-quality.poor span:nth-child(4){background:var(--dim);}
+
+/* LAYOUT */
+.main-layout{width:100%;max-width:960px;display:grid;grid-template-columns:1fr 320px;gap:14px;}
+@media(max-width:700px){.main-layout{grid-template-columns:1fr;}}
+
+/* VIDEO GRID */
+.video-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;position:relative;}
+@media(max-width:500px){.video-grid{grid-template-columns:1fr;}}
+.video-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;position:relative;aspect-ratio:16/9;box-shadow:0 6px 30px rgba(0,0,0,.5);cursor:pointer;}
+.video-card video{width:100%;height:100%;object-fit:cover;display:block;background:#000;}
+.video-label{position:absolute;bottom:8px;left:10px;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:3px 8px;font-size:.7rem;font-weight:500;}
+#net-badge{position:absolute;top:8px;right:10px;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);border-radius:6px;padding:4px 8px;display:none;align-items:center;gap:5px;font-size:.68rem;}
+#net-badge.show{display:flex;}
+.video-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--dim);font-size:.8rem;}
+.video-placeholder svg{width:42px;height:42px;opacity:.2;}
+
+/* PiP */
+#local-card.pip{position:absolute;bottom:12px;right:12px;width:26%;aspect-ratio:9/16;z-index:10;border-radius:10px;border:2px solid var(--accent);}
+
+/* Fullscreen */
+.video-card.fullscreen{position:fixed;inset:0;z-index:800;border-radius:0;aspect-ratio:unset;width:100vw;height:100vh;}
+.video-card.fullscreen video{height:100%;}
+
+/* Voice indicator */
+#voice-indicator{display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:var(--surface);}
+#voice-indicator.show{display:flex;}
+.voice-wave{display:flex;align-items:flex-end;gap:3px;height:36px;}
+.voice-wave span{display:block;width:4px;background:var(--accent);border-radius:3px;animation:wv 1.2s ease-in-out infinite;}
+.voice-wave span:nth-child(2){animation-delay:.1s;}.voice-wave span:nth-child(3){animation-delay:.2s;}.voice-wave span:nth-child(4){animation-delay:.3s;}.voice-wave span:nth-child(5){animation-delay:.2s;}.voice-wave span:nth-child(6){animation-delay:.1s;}
+@keyframes wv{0%,100%{height:4px;opacity:.5;}50%{height:32px;opacity:1;}}
+
+/* Emoji float */
+.emoji-float{position:fixed;font-size:2.5rem;pointer-events:none;z-index:900;animation:efloat 2s ease-out forwards;}
+@keyframes efloat{0%{transform:translateY(0) scale(1);opacity:1;}100%{transform:translateY(-200px) scale(1.5);opacity:0;}}
+
+/* Screenshot flash */
+#screenshot-flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:700;transition:opacity .15s;}
+
+/* CHAT PANEL */
+.chat-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);display:flex;flex-direction:column;min-height:300px;max-height:520px;}
+.chat-header{padding:12px 16px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:.85rem;font-weight:600;color:var(--accent);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.chat-unread{background:var(--danger);color:#fff;border-radius:999px;padding:1px 7px;font-size:.68rem;display:none;}
+.chat-unread.show{display:inline;}
+.emoji-bar{padding:6px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;}
+.emoji-btn-react{background:none;border:none;font-size:1.3rem;cursor:pointer;padding:2px 4px;border-radius:6px;transition:transform .1s;}
+.emoji-btn-react:hover{transform:scale(1.3);}
+#chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;}
+#chat-messages::-webkit-scrollbar{width:4px;}
+#chat-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.msg{display:flex;flex-direction:column;gap:2px;max-width:85%;}
+.msg.me{align-self:flex-end;align-items:flex-end;}
+.msg.them{align-self:flex-start;align-items:flex-start;}
+.msg-name{font-size:.65rem;color:var(--dim);}
+.msg-bubble{padding:7px 11px;border-radius:10px;font-size:.82rem;line-height:1.5;word-break:break-word;}
+.msg.me .msg-bubble{background:var(--accent);color:#fff;border-radius:10px 2px 10px 10px;}
+.msg.them .msg-bubble{background:var(--surface3);color:var(--text);border-radius:2px 10px 10px 10px;}
+.msg-time{font-size:.6rem;color:var(--dim);}
+.chat-footer{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-shrink:0;}
+#chat-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;padding:8px 12px;outline:none;transition:border-color .2s;}
+#chat-input:focus{border-color:var(--accent);}
+#chat-input::placeholder{color:var(--dim);}
+.sys-msg{text-align:center;font-size:.7rem;color:var(--dim);padding:4px 0;}
+
+/* INCOMING CALL */
+#incoming-screen{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.93);backdrop-filter:blur(12px);flex-direction:column;align-items:center;justify-content:center;gap:22px;}
+#incoming-screen.show{display:flex;}
+.incoming-avatar{width:88px;height:88px;border-radius:50%;background:var(--surface2);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:2.4rem;animation:ring 1.2s infinite;}
+@keyframes ring{0%,100%{box-shadow:0 0 0 0 rgba(59,130,246,.5);}60%{box-shadow:0 0 0 20px rgba(59,130,246,0);}}
+.incoming-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;}
+.incoming-sub{color:var(--dim);font-size:.82rem;text-align:center;}
+.incoming-btns{display:flex;gap:16px;}
+
+/* REC indicator */
+#rec-indicator{display:none;position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:600;background:rgba(239,68,68,.9);color:#fff;padding:6px 16px;border-radius:999px;font-size:.78rem;font-weight:600;letter-spacing:1px;gap:8px;align-items:center;}
+#rec-indicator.show{display:flex;}
+#rec-dot{width:8px;height:8px;border-radius:50%;background:#fff;animation:pdot .8s infinite;}
+
+/* TOAST */
+#toast-container{position:fixed;bottom:18px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:9999;}
+.toast{padding:10px 15px;border-radius:10px;font-size:.8rem;font-weight:500;max-width:290px;box-shadow:0 4px 20px rgba(0,0,0,.4);animation:slidein .2s ease-out;border:1px solid rgba(255,255,255,.07);}
+.toast.info{background:var(--surface2);color:var(--text);}
+.toast.success{background:#064e3b;color:#6ee7b7;}
+.toast.error{background:#450a0a;color:#fca5a5;}
+.toast.warn{background:#451a03;color:#fcd34d;}
+@keyframes slidein{from{transform:translateX(120%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+
+/* INSTRUCTIONS */
+.instructions{width:100%;max-width:960px;margin-top:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;}
+.instructions h3{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:600;margin-bottom:10px;color:var(--accent);}
+.instructions ol{padding-left:15px;display:flex;flex-direction:column;gap:5px;}
+.instructions li{font-size:.78rem;color:var(--dim);line-height:1.6;}
+.instructions li strong{color:var(--text);}
+#snap-canvas{display:none;}
+</style>
+</head>
+<body>
+
+<div id="screenshot-flash"></div>
+<div id="rec-indicator"><div id="rec-dot"></div>REC</div>
+
+<!-- HEADER -->
+<header>
+  <div>
+    <div class="logo">Call<span>Link</span></div>
+    <div class="logo-sub">by <span class="s">Siahaan</span> × <span class="a">AI</span></div>
+  </div>
+  <div id="status-badge"><div id="status-dot"></div><span id="status-text">Idle</span></div>
+</header>
+
+<!-- SETUP -->
+<div class="setup-panel">
+  <div class="setup-row">
+    <div class="field">
+      <label>Nama Kamu</label>
+      <input type="text" id="username" placeholder="Nama kamu…" maxlength="24"/>
+    </div>
+    <div class="field">
+      <label>Room ID</label>
+      <input type="text" id="room-id" placeholder="Room ID…" maxlength="40"/>
+    </div>
+    <div class="field" style="max-width:160px">
+      <label>Password (opsional)</label>
+      <input type="password" id="room-pass" placeholder="Kosongkan jika tidak ada" maxlength="32"/>
+    </div>
+    <button class="btn btn-ghost" onclick="generateRoomId()" title="Generate Room ID">🎲</button>
+    <button class="btn btn-ghost" onclick="shareRoomId()">🔗 Share</button>
+  </div>
+</div>
+
+<!-- ACTIONS -->
+<div class="actions">
+  <button class="btn btn-ghost"   id="btn-camera" onclick="startCamera()">📷 Start Camera</button>
+  <button class="btn btn-success" id="btn-vcall"  onclick="startCall('video')" disabled>🎥 Video Call</button>
+  <button class="btn btn-warn"    id="btn-acall"  onclick="startCall('audio')" disabled>🎙️ Voice Call</button>
+  <button class="btn btn-danger"  id="btn-end"    onclick="endCall()"          disabled>📵 End Call</button>
+</div>
+
+<!-- IN-CALL CONTROLS -->
+<div id="call-controls">
+  <div class="ctrl-group">
+    <button class="btn btn-ghost btn-icon" id="btn-mute"    onclick="toggleMute()"          title="Mute/Unmute">🎙️</button>
+    <button class="btn btn-ghost btn-icon" id="btn-camtog"  onclick="toggleCamera()"        title="Kamera On/Off">📹</button>
+    <button class="btn btn-ghost btn-icon" id="btn-flip"    onclick="flipCamera()"          title="Flip Kamera">🔄</button>
+    <button class="btn btn-ghost btn-icon" id="btn-speaker" onclick="toggleSpeaker()"       title="Speaker">🔊</button>
+    <button class="btn btn-ghost btn-icon" id="btn-pip"     onclick="togglePip()"           title="Picture-in-Picture">⧉</button>
+    <button class="btn btn-ghost btn-icon" id="btn-screen"  onclick="toggleScreenShare()"   title="Screen Share">🖥️</button>
+    <button class="btn btn-ghost btn-icon" id="btn-snap"    onclick="takeScreenshot()"      title="Screenshot">📸</button>
+    <button class="btn btn-ghost btn-icon" id="btn-rec"     onclick="toggleRecording()"     title="Record">⏺️</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div id="net-quality" title="Kualitas jaringan"><span></span><span></span><span></span><span></span></div>
+    <div id="call-timer">00:00</div>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+  <!-- VIDEO -->
+  <div class="video-grid" id="video-grid">
+    <div class="video-card" id="local-card" ondblclick="toggleFullscreen(this)">
+      <video id="local-video" autoplay muted playsinline></video>
+      <div class="video-label" id="local-label">Kamu</div>
+      <div class="video-placeholder" id="local-ph">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+        <span>Kamera belum aktif</span>
+      </div>
+      <div id="voice-indicator">
+        <div class="voice-wave"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <span style="font-size:.76rem;color:var(--dim)">Voice Only</span>
+      </div>
+    </div>
+    <div class="video-card" id="remote-card" ondblclick="toggleFullscreen(this)">
+      <video id="remote-video" autoplay playsinline></video>
+      <div class="video-label" id="remote-label">Lawan Bicara</div>
+      <div class="video-placeholder" id="remote-ph">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <span>Menunggu lawan bicara…</span>
+      </div>
+      <div id="net-badge"><span>📶</span><span id="net-badge-text">—</span></div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="chat-panel">
+    <div class="chat-header">
+      💬 In-Call Chat
+      <span class="chat-unread" id="chat-unread">0</span>
+    </div>
+    <div class="emoji-bar">
+      <button class="emoji-btn-react" onclick="sendReaction('👍')">👍</button>
+      <button class="emoji-btn-react" onclick="sendReaction('❤️')">❤️</button>
+      <button class="emoji-btn-react" onclick="sendReaction('😂')">😂</button>
+      <button class="emoji-btn-react" onclick="sendReaction('😮')">😮</button>
+      <button class="emoji-btn-react" onclick="sendReaction('👏')">👏</button>
+      <button class="emoji-btn-react" onclick="sendReaction('🔥')">🔥</button>
+    </div>
+    <div id="chat-messages"></div>
+    <div class="chat-footer">
+      <input type="text" id="chat-input" placeholder="Ketik pesan…" maxlength="500"
+             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"/>
+      <button class="btn btn-primary btn-icon" onclick="sendChat()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- INCOMING CALL -->
+<div id="incoming-screen">
+  <div class="incoming-avatar">📞</div>
+  <div class="incoming-title">Ada Panggilan Masuk!</div>
+  <div class="incoming-sub" id="incoming-sub">Room: —</div>
+  <div class="incoming-btns">
+    <button class="btn btn-success" onclick="answerCall()">✅ Angkat</button>
+    <button class="btn btn-danger"  onclick="rejectCall()">❌ Tolak</button>
+  </div>
+</div>
+
+<!-- INSTRUCTIONS -->
+<div class="instructions">
+  <h3>📋 Cara Penggunaan</h3>
+  <ol>
+    <li>Buka di <strong>dua perangkat</strong> via <strong>HTTPS</strong> (GitHub Pages / server).</li>
+    <li>Isi <strong>Nama</strong> + <strong>Room ID yang sama</strong> + <strong>Password</strong> (opsional) di kedua perangkat.</li>
+    <li>Klik <strong>Start Camera</strong> → pilih <strong>Video Call</strong> atau <strong>Voice Call</strong>.</li>
+    <li>Perangkat kedua klik Video/Voice Call dengan Room ID sama → muncul notif → klik <strong>Angkat</strong>.</li>
+    <li>Kontrol saat call: <strong>🎙️ Mute · 📹 Cam · 🔄 Flip · 🔊 Speaker · ⧉ PiP · 🖥️ Screen · 📸 Snap · ⏺️ Rec</strong></li>
+    <li>Double-tap video untuk <strong>fullscreen</strong>, tap lagi untuk keluar.</li>
+  </ol>
+</div>
+
+<canvas id="snap-canvas"></canvas>
+<div id="toast-container"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// FIREBASE
+// ─────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey:            "AIzaSyB5bnYJoZCc2z1UcWP4QFfWDIBJR43I8oU",
+  authDomain:        "wa-lite-568e2.firebaseapp.com",
+  databaseURL:       "https://wa-lite-568e2-default-rtdb.firebaseio.com",
+  projectId:         "wa-lite-568e2",
+  storageBucket:     "wa-lite-568e2.firebasestorage.app",
+  messagingSenderId: "504376037031",
+  appId:             "1:504376037031:web:e0d203b7a11c3b90e25582"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ─────────────────────────────────────────────
+// ICE SERVERS
+// ─────────────────────────────────────────────
+const ICE_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+  ]
+};
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let localStream      = null;
+let screenStream     = null;
+let pc               = null;   // RTCPeerConnection
+let dc               = null;   // RTCDataChannel
+let roomRef          = null;
+let chatRef          = null;
+let isCaller         = false;
+let isVoiceOnly      = false;
+let isMuted          = false;
+let isCamOff         = false;
+let isSpeakerOn      = true;
+let isPip            = false;
+let isScreenSharing  = false;
+let isRecording      = false;
+let facingMode       = 'user';
+let timerInterval    = null;
+let timerSecs        = 0;
+let netInterval      = null;
+let mediaRec         = null;
+let recChunks        = [];
+let pendingOffer     = null;
+let chatUnread       = 0;
+let myName           = 'Aku';
+let callActive       = false;  // FIX: flag agar tidak double endCall
+let broadcastRetries = 0;      // FIX: batas retry broadcastName
+
+// DOM
+const $  = id => document.getElementById(id);
+const lv = $('local-video');
+const rv = $('remote-video');
+
+// ─────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────
+function toast(msg, type='info', dur=4000) {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  $('toast-container').appendChild(el);
+  setTimeout(() => {
+    el.style.transition = 'opacity .3s';
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 300);
+  }, dur);
+}
+
+function setStatus(cls, txt) {
+  $('status-badge').className = cls;
+  $('status-text').textContent = txt;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─────────────────────────────────────────────
+// ROOM ID
+// ─────────────────────────────────────────────
+function generateRoomId() {
+  const c = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let id = '';
+  for (let i = 0; i < 8; i++) id += c[Math.floor(Math.random() * c.length)];
+  $('room-id').value = id;
+  toast('Room ID: ' + id, 'info');
+}
+
+function shareRoomId() {
+  const id = $('room-id').value.trim();
+  if (!id) { toast('Isi Room ID dulu!', 'warn'); return; }
+  const url = location.href.split('?')[0] + '?room=' + id;
+  if (navigator.share) {
+    navigator.share({ title: 'CallLink', text: 'Gabung di Room: ' + id, url });
+  } else {
+    navigator.clipboard.writeText(url)
+      .then(() => toast('Link disalin! 📋', 'success'))
+      .catch(() => toast('Salin manual: ' + url, 'info', 8000));
+  }
+}
+
+// Auto-fill room dari URL ?room=
+(function() {
+  const p = new URLSearchParams(location.search);
+  if (p.get('room')) $('room-id').value = p.get('room');
+})();
+
+// ─────────────────────────────────────────────
+// RINGTONE
+// ─────────────────────────────────────────────
+function playRingtone() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    let t = ctx.currentTime;
+    for (let r = 0; r < 3; r++) {
+      [880, 1100, 880, 1100].forEach(freq => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sine';
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.4, t + 0.05);
+        g.gain.linearRampToValueAtTime(0, t + 0.18);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t); o.stop(t + 0.2);
+        t += 0.22;
+      });
+      t += 0.5;
+    }
+  } catch(e) {}
+}
+
+// ─────────────────────────────────────────────
+// START CAMERA
+// ─────────────────────────────────────────────
+async function startCamera() {
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: true
+    });
+    lv.srcObject = localStream;
+    $('local-ph').style.display = 'none';
+    $('btn-vcall').disabled = false;
+    $('btn-acall').disabled = false;
+    $('btn-camera').disabled = true;
+    myName = $('username').value.trim() || 'Aku';
+    $('local-label').textContent = myName;
+    setStatus('', 'Kamera Aktif');
+    toast('Kamera & mikrofon aktif ✓', 'success');
+  } catch(err) {
+    const msg = err.name === 'NotAllowedError'
+      ? '❌ Izin ditolak. Buka via HTTPS & izinkan kamera.'
+      : '❌ ' + err.message;
+    toast(msg, 'error', 7000);
+  }
+}
+
+// ─────────────────────────────────────────────
+// PEER CONNECTION
+// ─────────────────────────────────────────────
+function createPC() {
+  pc = new RTCPeerConnection(ICE_CONFIG);
+
+  // Tambah semua local tracks
+  localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+  // Terima remote stream
+  pc.ontrack = e => {
+    rv.srcObject = e.streams[0];
+    $('remote-ph').style.display = 'none';
+    setStatus('connected', 'Terhubung');
+    toast('✅ Terhubung!', 'success');
+    startTimer();
+    startNetMonitor();
+    $('net-badge').classList.add('show');
+  };
+
+  // Kirim ICE candidates
+  pc.onicecandidate = e => {
+    if (!e.candidate || !roomRef) return;
+    const ref = isCaller
+      ? roomRef.child('callerCandidates')
+      : roomRef.child('calleeCandidates');
+    ref.push(e.candidate.toJSON());
+  };
+
+  // FIX: gunakan flag callActive agar tidak double-call endCall
+  pc.onconnectionstatechange = () => {
+    if (!pc) return;
+    const s = pc.connectionState;
+    if (s === 'disconnected' || s === 'failed') {
+      setStatus('disconnected', 'Terputus');
+      toast('Koneksi putus — mencoba reconnect…', 'warn');
+      setTimeout(attemptReconnect, 2000);
+    }
+    // FIX: 'closed' tidak trigger endCall lagi jika sudah di-close manual
+    if (s === 'closed' && callActive) {
+      callActive = false;
+    }
+  };
+
+  // Data channel
+  if (isCaller) {
+    dc = pc.createDataChannel('chat', { ordered: true });
+    setupDC(dc);
+  } else {
+    pc.ondatachannel = e => {
+      dc = e.channel;
+      setupDC(dc);
+    };
+  }
+}
+
+// ─────────────────────────────────────────────
+// DATA CHANNEL
+// ─────────────────────────────────────────────
+function setupDC(channel) {
+  channel.onopen = () => {
+    addSysMsg('Chat terhubung 💬');
+    // Kirim nama saat DC terbuka
+    sendDC({ type: 'name', name: myName });
+  };
+  channel.onclose = () => addSysMsg('Chat terputus.');
+  channel.onerror = e => console.warn('DC error:', e);
+  channel.onmessage = e => {
+    try {
+      const data = JSON.parse(e.data);
+      if (data.type === 'chat') {
+        appendChat(data.name, data.msg, data.time, false);
+        chatUnread++;
+        $('chat-unread').textContent = chatUnread;
+        $('chat-unread').classList.add('show');
+      } else if (data.type === 'reaction') {
+        floatEmoji(data.emoji, false);
+      } else if (data.type === 'name') {
+        $('remote-label').textContent = data.name;
+      }
+    } catch(err) {}
+  };
+}
+
+// Helper kirim ke DC (safe)
+function sendDC(obj) {
+  if (dc && dc.readyState === 'open') {
+    dc.send(JSON.stringify(obj));
+    return true;
+  }
+  return false;
+}
+
+// ─────────────────────────────────────────────
+// CHAT
+// ─────────────────────────────────────────────
+function sendChat() {
+  const input = $('chat-input');
+  const msg   = input.value.trim();
+  if (!msg) return;
+  if (!sendDC({ type: 'chat', name: myName, msg, time: timeNow() })) {
+    toast('Chat belum terhubung. Tunggu call tersambung.', 'warn');
+    return;
+  }
+  appendChat(myName, msg, timeNow(), true);
+  input.value = '';
+  chatUnread = 0;
+  $('chat-unread').classList.remove('show');
+}
+
+function appendChat(name, msg, time, isMe) {
+  const c   = $('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + (isMe ? 'me' : 'them');
+  div.innerHTML =
+    '<div class="msg-name">' + escapeHtml(name) + '</div>' +
+    '<div class="msg-bubble">' + escapeHtml(msg) + '</div>' +
+    '<div class="msg-time">' + time + '</div>';
+  c.appendChild(div);
+  c.scrollTop = c.scrollHeight;
+}
+
+function addSysMsg(txt) {
+  const c   = $('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'sys-msg';
+  div.textContent = txt;
+  c.appendChild(div);
+  c.scrollTop = c.scrollHeight;
+}
+
+function timeNow() {
+  return new Date().toLocaleTimeString('id', { hour: '2-digit', minute: '2-digit' });
+}
+
+// ─────────────────────────────────────────────
+// EMOJI REACTIONS
+// ─────────────────────────────────────────────
+function sendReaction(emoji) {
+  sendDC({ type: 'reaction', emoji });
+  floatEmoji(emoji, true);
+}
+
+function floatEmoji(emoji, isMe) {
+  const el = document.createElement('div');
+  el.className = 'emoji-float';
+  el.textContent = emoji;
+  el.style.left   = (isMe ? '30%' : '60%');
+  el.style.bottom = '20%';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2100);
+}
+
+// ─────────────────────────────────────────────
+// START CALL
+// ─────────────────────────────────────────────
+async function startCall(mode) {
+  const roomId = $('room-id').value.trim();
+  const pass   = $('room-pass').value.trim();
+  myName       = $('username').value.trim() || 'Aku';
+
+  if (!roomId)       { toast('Masukkan Room ID!', 'warn'); return; }
+  if (!localStream)  { toast('Aktifkan kamera dulu!', 'warn'); return; }
+  if (callActive)    { toast('Call sedang berlangsung.', 'warn'); return; }
+
+  isVoiceOnly = (mode === 'audio');
+  localStream.getVideoTracks().forEach(t => t.enabled = !isVoiceOnly);
+  lv.style.opacity = isVoiceOnly ? '0' : '1';
+  $('voice-indicator').className = isVoiceOnly ? 'show' : '';
+
+  setStatus('connecting', 'Menghubungkan…');
+  $('btn-vcall').disabled = true;
+  $('btn-acall').disabled = true;
+  $('btn-end').disabled   = false;
+  $('call-controls').classList.add('show');
+  callActive = true;
+
+  roomRef = db.ref('calllink-rooms/' + roomId);
+  chatRef = db.ref('calllink-rooms/' + roomId + '/fchat');
+
+  let snap, data;
+  try {
+    snap = await roomRef.once('value');
+    data = snap.val();
+  } catch(e) {
+    toast('❌ Gagal terhubung ke Firebase: ' + e.message, 'error');
+    resetUI(); return;
+  }
+
+  // Cek password
+  if (data && data.password && data.password !== pass) {
+    toast('❌ Password salah!', 'error');
+    resetUI(); return;
+  }
+
+  if (data && data.offer && !data.answer) {
+    // Ada offer masuk — incoming call
+    pendingOffer = data.offer;
+    $('incoming-sub').textContent = 'Room: ' + roomId + (pass ? ' 🔒' : '');
+    $('incoming-screen').classList.add('show');
+    playRingtone();
+  } else {
+    await joinAsCaller(pass);
+  }
+}
+
+// ─────────────────────────────────────────────
+// ANSWER / REJECT
+// ─────────────────────────────────────────────
+async function answerCall() {
+  $('incoming-screen').classList.remove('show');
+  if (pendingOffer) await joinAsCallee(pendingOffer);
+}
+
+function rejectCall() {
+  $('incoming-screen').classList.remove('show');
+  pendingOffer = null;
+  resetUI();
+  toast('Panggilan ditolak.', 'info');
+}
+
+// ─────────────────────────────────────────────
+// CALLER
+// ─────────────────────────────────────────────
+async function joinAsCaller(pass) {
+  isCaller = true;
+  try { await roomRef.remove(); } catch(e) {}
+  createPC();
+
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  const roomData = { offer: { type: offer.type, sdp: offer.sdp }, createdAt: Date.now() };
+  if (pass) roomData.password = pass;
+  await roomRef.set(roomData);
+
+  toast('📡 Menunggu lawan bicara…', 'info', 8000);
+
+  // Dengarkan answer
+  roomRef.child('answer').on('value', async snap => {
+    const ans = snap.val();
+    if (ans && pc && !pc.currentRemoteDescription) {
+      try { await pc.setRemoteDescription(new RTCSessionDescription(ans)); }
+      catch(e) { console.warn('setRemoteDescription error:', e); }
+    }
+  });
+
+  // Dengarkan ICE candidates callee
+  roomRef.child('calleeCandidates').on('child_added', async snap => {
+    const c = snap.val();
+    if (c && pc && pc.remoteDescription) {
+      try { await pc.addIceCandidate(new RTCIceCandidate(c)); }
+      catch(e) { console.warn('addIceCandidate error:', e); }
+    }
+  });
+}
+
+// ─────────────────────────────────────────────
+// CALLEE
+// ─────────────────────────────────────────────
+async function joinAsCallee(offerData) {
+  isCaller = false;
+  createPC();
+
+  try {
+    await pc.setRemoteDescription(new RTCSessionDescription(offerData));
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    await roomRef.child('answer').set({ type: answer.type, sdp: answer.sdp });
+  } catch(e) {
+    toast('❌ Gagal menjawab panggilan: ' + e.message, 'error');
+    endCall(); return;
+  }
+
+  toast('📞 Menyambungkan…', 'info');
+
+  // Dengarkan ICE candidates caller
+  roomRef.child('callerCandidates').on('child_added', async snap => {
+    const c = snap.val();
+    if (c && pc && pc.remoteDescription) {
+      try { await pc.addIceCandidate(new RTCIceCandidate(c)); }
+      catch(e) { console.warn('addIceCandidate error:', e); }
+    }
+  });
+}
+
+// ─────────────────────────────────────────────
+// RECONNECT
+// FIX: guard dengan callActive agar tidak loop
+// ─────────────────────────────────────────────
+async function attemptReconnect() {
+  if (!callActive || !roomRef || !localStream) return;
+  toast('🔄 Reconnecting…', 'warn', 3000);
+  if (pc) { pc.close(); pc = null; }
+  dc = null;
+  try {
+    if (isCaller) {
+      await joinAsCaller($('room-pass').value.trim());
+    } else {
+      const snap = await roomRef.once('value');
+      const d    = snap.val();
+      if (d && d.offer) await joinAsCallee(d.offer);
+      else toast('Room tidak ditemukan untuk reconnect.', 'warn');
+    }
+  } catch(e) {
+    toast('Reconnect gagal: ' + e.message, 'error');
+  }
+}
+
+// ─────────────────────────────────────────────
+// END CALL
+// FIX: guard callActive untuk cegah double-call
+// ─────────────────────────────────────────────
+async function endCall() {
+  if (!callActive && !pc && !localStream) return; // sudah bersih
+  callActive = false;
+
+  // Stop recording dulu jika aktif
+  if (isRecording) stopRecordingInternal();
+
+  // Tutup peer connection
+  if (pc) { pc.onconnectionstatechange = null; pc.close(); pc = null; }
+  dc = null;
+
+  // Stop semua stream
+  if (localStream)  { localStream.getTracks().forEach(t => t.stop());  localStream  = null; }
+  if (screenStream) { screenStream.getTracks().forEach(t => t.stop()); screenStream = null; }
+
+  // Hapus room dari Firebase
+  if (roomRef) { try { await roomRef.remove(); } catch(e) {} roomRef = null; }
+  chatRef = null;
+
+  stopTimer();
+  stopNetMonitor();
+  resetUI();
+  toast('📵 Call diakhiri.', 'info');
+  setTimeout(() => setStatus('', 'Idle'), 3000);
+}
+
+// ─────────────────────────────────────────────
+// RESET UI
+// ─────────────────────────────────────────────
+function resetUI() {
+  lv.srcObject = null; rv.srcObject = null;
+  $('local-ph').style.display  = '';
+  $('remote-ph').style.display = '';
+  lv.style.opacity = '1';
+  $('voice-indicator').className = '';
+  $('local-card').classList.remove('pip');
+  $('call-controls').classList.remove('show');
+  $('net-badge').classList.remove('show');
+  $('chat-messages').innerHTML = '';
+  chatUnread = 0;
+  $('chat-unread').classList.remove('show');
+  $('btn-camera').disabled = false;
+  $('btn-vcall').disabled  = true;
+  $('btn-acall').disabled  = true;
+  $('btn-end').disabled    = true;
+  isMuted = isCamOff = isPip = isScreenSharing = isRecording = false;
+  broadcastRetries = 0;
+  // Reset semua tombol kontrol
+  ['btn-mute','btn-camtog','btn-speaker','btn-pip','btn-screen','btn-rec'].forEach(id => {
+    $(id).className = 'btn btn-ghost btn-icon';
+  });
+  $('btn-mute').textContent    = '🎙️';
+  $('btn-camtog').textContent  = '📹';
+  $('btn-speaker').textContent = '🔊';
+  $('btn-pip').textContent     = '⧉';
+  $('btn-screen').textContent  = '🖥️';
+  $('btn-rec').textContent     = '⏺️';
+  $('rec-indicator').classList.remove('show');
+  setStatus('disconnected', 'Disconnected');
+}
+
+// ─────────────────────────────────────────────
+// IN-CALL CONTROLS
+// ─────────────────────────────────────────────
+
+// Mute/Unmute
+function toggleMute() {
+  if (!localStream) return;
+  isMuted = !isMuted;
+  localStream.getAudioTracks().forEach(t => t.enabled = !isMuted);
+  $('btn-mute').textContent  = isMuted ? '🔇' : '🎙️';
+  $('btn-mute').className    = isMuted ? 'btn btn-active btn-icon' : 'btn btn-ghost btn-icon';
+  toast(isMuted ? 'Mikrofon mati 🔇' : 'Mikrofon aktif 🎙️', 'info', 2000);
+}
+
+// Camera On/Off
+function toggleCamera() {
+  if (!localStream) return;
+  isCamOff = !isCamOff;
+  localStream.getVideoTracks().forEach(t => t.enabled = !isCamOff);
+  lv.style.opacity           = isCamOff ? '0.08' : '1';
+  $('btn-camtog').textContent = isCamOff ? '📷' : '📹';
+  $('btn-camtog').className   = isCamOff ? 'btn btn-active btn-icon' : 'btn btn-ghost btn-icon';
+  toast(isCamOff ? 'Kamera mati' : 'Kamera aktif', 'info', 2000);
+}
+
+// Flip kamera — FIX: simpan referensi oldTrack SEBELUM stop
+async function flipCamera() {
+  if (!localStream) return;
+  facingMode = facingMode === 'user' ? 'environment' : 'user';
+
+  // Simpan referensi track lama sebelum di-stop
+  const oldTrack = localStream.getVideoTracks()[0];
+
+  try {
+    const newStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: false
+    });
+    const newTrack = newStream.getVideoTracks()[0];
+
+    // Stop track lama
+    if (oldTrack) { oldTrack.stop(); localStream.removeTrack(oldTrack); }
+    localStream.addTrack(newTrack);
+
+    // Ganti track di peer connection
+    if (pc) {
+      const sender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+      if (sender) await sender.replaceTrack(newTrack);
+    }
+
+    lv.srcObject = localStream;
+    toast(facingMode === 'user' ? '📷 Kamera depan' : '📷 Kamera belakang', 'info', 2000);
+  } catch(e) {
+    // Kembalikan facing mode jika gagal
+    facingMode = facingMode === 'user' ? 'environment' : 'user';
+    toast('Gagal flip kamera: ' + e.message, 'error');
+  }
+}
+
+// Speaker
+function toggleSpeaker() {
+  isSpeakerOn = !isSpeakerOn;
+  if (rv.setSinkId) {
+    rv.setSinkId(isSpeakerOn ? '' : 'default').catch(() => {});
+  }
+  $('btn-speaker').textContent = isSpeakerOn ? '🔊' : '🔈';
+  $('btn-speaker').className   = !isSpeakerOn ? 'btn btn-active btn-icon' : 'btn btn-ghost btn-icon';
+  toast(isSpeakerOn ? 'Loudspeaker 🔊' : 'Earpiece 🔈', 'info', 2000);
+}
+
+// PiP
+function togglePip() {
+  isPip = !isPip;
+  $('local-card').classList.toggle('pip', isPip);
+  $('btn-pip').className = isPip ? 'btn btn-active btn-icon' : 'btn btn-ghost btn-icon';
+  toast(isPip ? 'PiP aktif ⧉' : 'PiP nonaktif', 'info', 2000);
+}
+
+// Screen Share
+async function toggleScreenShare() {
+  if (!isScreenSharing) {
+    try {
+      screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+      const screenTrack = screenStream.getVideoTracks()[0];
+
+      if (pc) {
+        const sender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+        if (sender) await sender.replaceTrack(screenTrack);
+      }
+
+      lv.srcObject   = screenStream;
+      isScreenSharing = true;
+      $('btn-screen').className = 'btn btn-active btn-icon';
+      toast('🖥️ Screen sharing aktif', 'success', 2000);
+
+      // Otomatis stop jika user klik stop di browser
+      screenTrack.onended = () => { if (isScreenSharing) toggleScreenShare(); };
+    } catch(e) {
+      toast('Screen share gagal: ' + e.message, 'error');
+    }
+  } else {
+    if (screenStream) { screenStream.getTracks().forEach(t => t.stop()); screenStream = null; }
+    // Kembalikan ke kamera
+    if (localStream) {
+      const camTrack = localStream.getVideoTracks()[0];
+      if (pc && camTrack) {
+        const sender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+        if (sender) await sender.replaceTrack(camTrack).catch(() => {});
+      }
+      lv.srcObject = localStream;
+    }
+    isScreenSharing = false;
+    $('btn-screen').className = 'btn btn-ghost btn-icon';
+    toast('Screen share dihentikan', 'info', 2000);
+  }
+}
+
+// Screenshot
+function takeScreenshot() {
+  const canvas = $('snap-canvas');
+  const video  = (rv.srcObject ? rv : lv);
+  canvas.width  = video.videoWidth  || 640;
+  canvas.height = video.videoHeight || 480;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a   = document.createElement('a');
+    a.href = url; a.download = 'calllink-' + Date.now() + '.png';
+    a.click(); URL.revokeObjectURL(url);
+  }, 'image/png');
+  // Flash efek
+  const f = $('screenshot-flash');
+  f.style.opacity = '0.8';
+  setTimeout(() => f.style.opacity = '0', 150);
+  toast('📸 Screenshot disimpan!', 'success', 2000);
+}
+
+// Recording — FIX: fallback mimeType untuk Android
+function getSupportedMimeType() {
+  const types = [
+    'video/webm;codecs=vp9,opus',
+    'video/webm;codecs=vp8,opus',
+    'video/webm',
+    'video/mp4',
+    ''
+  ];
+  return types.find(t => !t || MediaRecorder.isTypeSupported(t)) || '';
+}
+
+function toggleRecording() {
+  if (!isRecording) startRecordingInternal();
+  else              stopRecordingInternal();
+}
+
+function startRecordingInternal() {
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 640; canvas.height = 240;
+    const ctx = canvas.getContext('2d');
+
+    // FIX: gunakan captureStream jika ada
+    const canvasStream = canvas.captureStream
+      ? canvas.captureStream(25)
+      : canvas.mozCaptureStream(25);
+
+    // Mix audio lokal + remote
+    const ac   = new AudioContext();
+    const dest = ac.createMediaStreamDestination();
+    [localStream, rv.srcObject].filter(Boolean).forEach(s => {
+      s.getAudioTracks().forEach(t => {
+        ac.createMediaStreamSource(new MediaStream([t])).connect(dest);
+      });
+    });
+
+    const finalStream = new MediaStream([
+      ...canvasStream.getVideoTracks(),
+      ...dest.stream.getAudioTracks()
+    ]);
+
+    // Draw loop
+    window._recLoop = setInterval(() => {
+      if (lv.srcObject) ctx.drawImage(lv, 0, 0, 320, 240);
+      if (rv.srcObject) ctx.drawImage(rv, 320, 0, 320, 240);
+    }, 40);
+
+    const mimeType = getSupportedMimeType();
+    mediaRec  = new MediaRecorder(finalStream, mimeType ? { mimeType } : {});
+    recChunks = [];
+
+    mediaRec.ondataavailable = e => { if (e.data && e.data.size > 0) recChunks.push(e.data); };
+    mediaRec.onstop = () => {
+      clearInterval(window._recLoop);
+      const blob = new Blob(recChunks, { type: recChunks[0]?.type || 'video/webm' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = 'calllink-rec-' + Date.now() + '.webm';
+      a.click(); URL.revokeObjectURL(url);
+      toast('⏹️ Rekaman disimpan!', 'success');
+    };
+    mediaRec.onerror = e => toast('Error rekaman: ' + e.error?.message, 'error');
+
+    mediaRec.start(1000);
+    isRecording = true;
+    $('btn-rec').textContent = '⏹️';
+    $('btn-rec').className   = 'btn btn-active btn-icon';
+    $('rec-indicator').classList.add('show');
+    toast('⏺️ Rekaman dimulai', 'success', 2000);
+  } catch(e) {
+    toast('Rekaman gagal: ' + e.message, 'error');
+    isRecording = false;
+  }
+}
+
+function stopRecordingInternal() {
+  if (mediaRec && mediaRec.state !== 'inactive') {
+    try { mediaRec.stop(); } catch(e) {}
+  }
+  clearInterval(window._recLoop);
+  mediaRec    = null;
+  isRecording = false;
+  $('btn-rec').textContent = '⏺️';
+  $('btn-rec').className   = 'btn btn-ghost btn-icon';
+  $('rec-indicator').classList.remove('show');
+}
+
+// Fullscreen — FIX: gunakan native Fullscreen API jika tersedia
+function toggleFullscreen(card) {
+  if (document.fullscreenElement === card) {
+    document.exitFullscreen().catch(() => card.classList.remove('fullscreen'));
+  } else if (card.requestFullscreen) {
+    card.requestFullscreen().catch(() => {
+      // Fallback CSS fullscreen
+      card.classList.toggle('fullscreen');
+      if (card.classList.contains('fullscreen')) {
+        const exit = () => { card.classList.remove('fullscreen'); card.removeEventListener('click', exit); };
+        setTimeout(() => card.addEventListener('click', exit), 200);
+      }
+    });
+  } else {
+    card.classList.toggle('fullscreen');
+    if (card.classList.contains('fullscreen')) {
+      const exit = () => { card.classList.remove('fullscreen'); card.removeEventListener('click', exit); };
+      setTimeout(() => card.addEventListener('click', exit), 200);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────
+// TIMER
+// ─────────────────────────────────────────────
+function startTimer() {
+  timerSecs = 0;
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timerSecs++;
+    const m = String(Math.floor(timerSecs / 60)).padStart(2, '0');
+    const s = String(timerSecs % 60).padStart(2, '0');
+    $('call-timer').textContent = m + ':' + s;
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  $('call-timer').textContent = '00:00';
+}
+
+// ─────────────────────────────────────────────
+// NETWORK MONITOR
+// ─────────────────────────────────────────────
+function startNetMonitor() {
+  clearInterval(netInterval);
+  netInterval = setInterval(async () => {
+    if (!pc) return;
+    try {
+      const stats = await pc.getStats();
+      let rtt = null, lost = 0, recv = 1;
+      stats.forEach(s => {
+        if (s.type === 'candidate-pair' && s.state === 'succeeded' && s.currentRoundTripTime != null) {
+          rtt = s.currentRoundTripTime * 1000;
+        }
+        if (s.type === 'inbound-rtp' && s.kind === 'video') {
+          lost = s.packetsLost  || 0;
+          recv = s.packetsReceived || 1;
+        }
+      });
+      const loss = lost / (recv + lost);
+      let q = 'good';
+      if (rtt > 200 || loss > 0.05) q = 'medium';
+      if (rtt > 500 || loss > 0.15) q = 'poor';
+      $('net-quality').className = q;
+      if (rtt !== null) {
+        $('net-badge-text').textContent = Math.round(rtt) + 'ms';
+      }
+    } catch(e) {}
+  }, 3000);
+}
+
+function stopNetMonitor() {
+  clearInterval(netInterval);
+  netInterval = null;
+  $('net-quality').className = '';
+  $('net-badge-text').textContent = '—';
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+window.addEventListener('load', () => {
+  if (!navigator.mediaDevices || !window.RTCPeerConnection) {
+    toast('❌ Browser tidak support WebRTC. Gunakan Chrome/Edge terbaru.', 'error', 0);
+  } else {
+    toast('Siap. Isi nama & Room ID → Start Camera → Call.', 'info', 5000);
+  }
+});
+</script>
+</body>
+</html>
