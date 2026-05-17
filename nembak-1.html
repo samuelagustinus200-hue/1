@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Untuk Kamu 🌸</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:     #12091a;
+  --rose:   #f0a0be;
+  --gold:   #e8cc80;
+  --text:   #f5e8ee;
+  --muted:  rgba(245,232,238,0.55);
+  --glass:  rgba(255,255,255,0.05);
+  --border: rgba(240,160,190,0.15);
+  --glow:   rgba(210,100,130,0.28);
+}
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  font-family: 'Jost', sans-serif;
+  color: var(--text);
+  overflow-x: hidden;
+}
+.bg {
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 15% 15%, rgba(180,60,110,0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 70% at 85% 85%, rgba(90,20,130,0.22) 0%, transparent 65%),
+    #12091a;
+}
+.stars { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+.star { position: absolute; background: #fff; border-radius: 50%; animation: twinkle ease-in-out infinite; }
+@keyframes twinkle { 0%,100%{opacity:.1;transform:scale(1);} 50%{opacity:.8;transform:scale(1.5);} }
+canvas { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
+#confettiCanvas { z-index: 100; }
+#cur {
+  width: 20px; height: 20px; border-radius: 50%;
+  position: fixed; pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%);
+  background: radial-gradient(circle, rgba(240,160,190,0.85) 0%, transparent 70%);
+  mix-blend-mode: screen;
+}
+.page {
+  position: relative; z-index: 10;
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 2rem 1rem;
+}
+.card {
+  position: relative;
+  background: var(--glass);
+  backdrop-filter: blur(32px) saturate(1.6);
+  -webkit-backdrop-filter: blur(32px) saturate(1.6);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  max-width: 480px; width: 100%;
+  padding: 3rem 2.4rem 2.5rem;
+  box-shadow: 0 0 0 1px rgba(240,160,190,0.06), 0 32px 90px rgba(0,0,0,0.55), 0 0 80px var(--glow);
+  text-align: center;
+  animation: rise 1s cubic-bezier(.22,1,.36,1) both;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--rose), var(--gold), transparent);
+  opacity: .6; animation: shimmer 4s ease-in-out infinite;
+}
+@keyframes shimmer { 0%,100%{opacity:.3;} 50%{opacity:.85;} }
+@keyframes rise { from{opacity:0;transform:translateY(44px) scale(.97);} to{opacity:1;transform:translateY(0) scale(1);} }
+
+/* heart */
+.heart-wrap { display:flex; align-items:center; justify-content:center; margin-bottom:1.4rem; }
+.heart-svg { width:70px; height:70px; filter:drop-shadow(0 0 20px rgba(210,100,140,0.8)); animation:heartbeat 1.8s ease-in-out infinite; }
+@keyframes heartbeat { 0%,100%{transform:scale(1);} 15%{transform:scale(1.18);} 30%{transform:scale(1);} 45%{transform:scale(1.1);} 60%{transform:scale(1);} }
+
+h1 {
+  font-family: 'Cormorant Garamond', serif; font-weight: 300;
+  font-size: clamp(1.5rem,5vw,2.2rem); line-height:1.2; letter-spacing:.02em;
+  background: linear-gradient(135deg, var(--rose) 0%, var(--gold) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  margin-bottom:.4rem;
+}
+.sub {
+  font-size:.85rem; letter-spacing:.06em; color:var(--muted); margin-bottom:1.6rem;
+}
+.ornament { display:flex; align-items:center; gap:.6rem; margin:1.2rem 0; }
+.ornament::before,.ornament::after { content:'';flex:1;height:1px; background:linear-gradient(90deg,transparent,rgba(240,160,190,0.35),transparent); }
+.ornament span { font-size:10px;letter-spacing:.18em;color:var(--rose);opacity:.6; }
+
+/* ── SETUP PAGE ── */
+.setup-label {
+  display:block; text-align:left;
+  font-size:.78rem; letter-spacing:.1em; color:var(--rose);
+  margin-bottom:.5rem; opacity:.8;
+}
+.input-wrap { position:relative; margin-bottom:1.2rem; }
+.input-prefix {
+  position:absolute; left:1.1rem; top:50%; transform:translateY(-50%);
+  font-size:.92rem; color:var(--muted); pointer-events:none;
+  font-family:'Jost',sans-serif;
+}
+.phone-input {
+  width:100%; padding:.82rem 1rem .82rem 3rem;
+  background:rgba(255,255,255,0.07);
+  border:1.5px solid rgba(255,255,255,0.2);
+  border-radius:50px;
+  color:#fff; font-family:'Jost',sans-serif; font-size:.95rem; letter-spacing:.05em;
+  outline:none; transition:border-color .2s;
+}
+.phone-input::placeholder { color:rgba(255,255,255,0.25); }
+.phone-input:focus { border-color:rgba(240,160,190,0.6); }
+/* hide number spinners */
+.phone-input::-webkit-outer-spin-button,
+.phone-input::-webkit-inner-spin-button { -webkit-appearance:none; }
+.phone-input[type=number] { -moz-appearance:textfield; }
+
+.name-input {
+  width:100%; padding:.82rem 1rem;
+  background:rgba(255,255,255,0.07);
+  border:1.5px solid rgba(255,255,255,0.2);
+  border-radius:50px;
+  color:#fff; font-family:'Jost',sans-serif; font-size:.95rem; letter-spacing:.05em;
+  outline:none; transition:border-color .2s; margin-bottom:1.2rem;
+}
+.name-input::placeholder { color:rgba(255,255,255,0.25); }
+.name-input:focus { border-color:rgba(240,160,190,0.6); }
+
+.btn-generate {
+  width:100%; padding:.85rem;
+  background:linear-gradient(135deg,#e0789a,#b84060);
+  color:#fff; border:none; border-radius:50px;
+  font-family:'Jost',sans-serif; font-size:.95rem; letter-spacing:.1em;
+  cursor:pointer;
+  box-shadow:0 8px 28px rgba(184,64,96,.4);
+  transition:transform .2s,box-shadow .2s;
+}
+.btn-generate:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(184,64,96,.55); }
+
+/* result link box */
+.link-box {
+  display:none; margin-top:1.4rem;
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(240,160,190,0.2);
+  border-radius:16px; padding:1.2rem;
+}
+.link-box p { font-size:.78rem; color:var(--muted); margin-bottom:.6rem; letter-spacing:.05em; }
+.link-text {
+  font-size:.78rem; color:var(--rose);
+  word-break:break-all; line-height:1.6;
+  background:rgba(240,120,160,.08);
+  border-radius:10px; padding:.6rem .8rem;
+  margin-bottom:.8rem; display:block;
+  font-family:'Jost',sans-serif;
+}
+.btn-copy {
+  width:100%; padding:.7rem;
+  background:rgba(240,120,160,.15);
+  color:var(--rose); border:1px solid rgba(240,160,190,.3);
+  border-radius:50px; font-family:'Jost',sans-serif;
+  font-size:.85rem; letter-spacing:.08em;
+  cursor:pointer; transition:background .2s;
+}
+.btn-copy:hover { background:rgba(240,120,160,.25); }
+.copy-note { font-size:.72rem; color:rgba(240,160,190,.4); margin-top:.5rem; display:block; }
+
+/* ── CONFESSION PAGE ── */
+.letter {
+  font-family:'Cormorant Garamond',serif; font-style:italic;
+  font-size:clamp(.96rem,2.5vw,1.08rem); line-height:1.95;
+  color:rgba(245,232,238,.82);
+  background:rgba(240,120,160,.05); border:1px solid rgba(240,160,190,.1);
+  border-radius:18px; padding:1.4rem 1.5rem 1.4rem 2rem;
+  text-align:left; margin-bottom:1.5rem; position:relative;
+}
+.letter::before {
+  content:'\201C'; font-family:'Cormorant Garamond',serif;
+  font-size:5.5rem; line-height:0; color:rgba(240,130,160,.16);
+  position:absolute; top:1.8rem; left:.5rem; pointer-events:none;
+}
+.question {
+  font-family:'Cormorant Garamond',serif; font-weight:300;
+  font-size:clamp(1.1rem,3.5vw,1.38rem); letter-spacing:.04em; margin-bottom:1.4rem;
+}
+
+/* buttons */
+.btn-row { display:flex; align-items:center; justify-content:center; gap:12px; width:100%; }
+.btn-yes {
+  font-family:'Jost',sans-serif; font-weight:400; font-size:.92rem; letter-spacing:.08em;
+  border:none; border-radius:50px; padding:.78rem 2rem; cursor:pointer;
+  background:linear-gradient(135deg,#e0789a,#b84060); color:#fff;
+  box-shadow:0 8px 28px rgba(184,64,96,.45); flex-shrink:0;
+  transition:transform .2s,box-shadow .2s;
+}
+.btn-yes:hover { transform:translateY(-3px) scale(1.04); box-shadow:0 14px 36px rgba(184,64,96,.6); }
+
+#btnNo {
+  font-family:'Jost',sans-serif; font-weight:400; font-size:.92rem; letter-spacing:.08em;
+  border-radius:50px; padding:.78rem 1.6rem; cursor:pointer;
+  background:rgba(255,255,255,0.13); color:#ffffff;
+  border:1.5px solid rgba(255,255,255,0.4); flex-shrink:0;
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes wiggle {
+  0%{transform:rotate(0) scale(1);} 20%{transform:rotate(-8deg) scale(1.08);}
+  40%{transform:rotate(8deg) scale(1.05);} 60%{transform:rotate(-5deg) scale(1.03);}
+  80%{transform:rotate(3deg) scale(1.01);} 100%{transform:rotate(0) scale(1);}
+}
+#btnNo.wiggling { animation:wiggle .45s ease forwards; }
+
+#noHint { min-height:1.2em; font-size:.76rem; letter-spacing:.07em; color:rgba(240,160,190,.6); margin-top:.5rem; }
+
+/* result screen */
+.screen { display:none; flex-direction:column; align-items:center; gap:1.1rem; }
+.screen.active { display:flex; animation:rise .75s ease both; }
+.result-icon { font-size:66px; animation:floatIcon 3s ease-in-out infinite; }
+@keyframes floatIcon { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-12px);} }
+.result-title {
+  font-family:'Cormorant Garamond',serif; font-weight:300;
+  font-size:clamp(1.5rem,5vw,2.1rem);
+  background:linear-gradient(135deg,var(--rose),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  text-align:center;
+}
+.result-msg { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.05rem; line-height:1.85; color:var(--muted); text-align:center; max-width:340px; }
+.wa-btn {
+  display:inline-flex; align-items:center; gap:.65rem;
+  background:linear-gradient(135deg,#2ecc71,#1a9950); color:#fff;
+  font-family:'Jost',sans-serif; font-size:.88rem; letter-spacing:.1em;
+  border:none; border-radius:50px; padding:.85rem 2rem;
+  cursor:pointer; text-decoration:none; box-shadow:0 8px 28px rgba(46,204,113,.3);
+  transition:transform .2s,box-shadow .2s;
+}
+.wa-btn:hover { transform:translateY(-3px); box-shadow:0 14px 40px rgba(46,204,113,.45); }
+.wa-note { font-size:.7rem; letter-spacing:.06em; color:rgba(245,232,238,.25); }
+
+.fheart { position:fixed; pointer-events:none; opacity:0; z-index:50; animation:floatUp linear forwards; }
+@keyframes floatUp { 0%{transform:translateY(0) scale(1) rotate(-10deg);opacity:.9;} 100%{transform:translateY(-130px) scale(.3) rotate(15deg);opacity:0;} }
+
+.err { font-size:.78rem; color:#f4a7a7; margin-top:.4rem; min-height:1.1em; letter-spacing:.05em; }
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div class="bg"></div>
+<div class="stars" id="stars"></div>
+<canvas id="particleCanvas"></canvas>
+<canvas id="confettiCanvas"></canvas>
+
+<div class="page">
+  <div class="card" id="mainCard">
+
+    <!-- ══ SETUP PAGE (default) ══ -->
+    <div id="pageSetup">
+      <div class="heart-wrap">
+        <svg class="heart-svg" viewBox="0 0 100 90" fill="none">
+          <defs>
+            <linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#f4a7c0"/><stop offset="100%" stop-color="#b84060"/>
+            </linearGradient>
+          </defs>
+          <path fill="url(#hg)" d="M50 83 C50 83 4 52 4 27 C4 13 15 3 27 3 C35 3 44 8 50 16 C56 8 65 3 73 3 C85 3 96 13 96 27 C96 52 50 83 50 83Z"/>
+        </svg>
+      </div>
+
+      <h1>Buat Link Nembak Kamu</h1>
+      <p class="sub">Masukkan data kamu dulu, nanti kamu tinggal kirim linknya ke dia 💌</p>
+      <div class="ornament"><span>✦ &nbsp; langkah mudah &nbsp; ✦</span></div>
+
+      <label class="setup-label">Nama kamu</label>
+      <input class="name-input" id="senderName" type="text" placeholder="contoh: Raka" maxlength="30"/>
+
+      <label class="setup-label">Nomor WhatsApp kamu</label>
+      <div class="input-wrap">
+        <span class="input-prefix">+62</span>
+        <input class="phone-input" id="phoneInput" type="number" placeholder="8xxxxxxxxxx"/>
+      </div>
+
+      <p class="err" id="inputErr"></p>
+      <button class="btn-generate" onclick="generateLink()">✨ &nbsp; Buat Link Sekarang</button>
+
+      <div class="link-box" id="linkBox">
+        <p>🎉 Link siap! Kirim ini ke dia:</p>
+        <span class="link-text" id="linkText"></span>
+        <button class="btn-copy" onclick="copyLink()">📋 &nbsp; Salin Link</button>
+        <span class="copy-note" id="copyNote"></span>
+      </div>
+    </div>
+
+    <!-- ══ CONFESSION PAGE ══ -->
+    <div id="pageConfession" style="display:none;">
+
+      <!-- Main -->
+      <div id="screenMain">
+        <div class="heart-wrap">
+          <svg class="heart-svg" viewBox="0 0 100 90" fill="none">
+            <use href="#hg-path"/>
+            <path fill="url(#hg)" d="M50 83 C50 83 4 52 4 27 C4 13 15 3 27 3 C35 3 44 8 50 16 C56 8 65 3 73 3 C85 3 96 13 96 27 C96 52 50 83 50 83Z"/>
+          </svg>
+        </div>
+
+        <h1 id="confessTitle">Ada Sesuatu yang Ingin Aku Katakan…</h1>
+        <div class="ornament"><span>✦ &nbsp; dari lubuk hati yang terdalam &nbsp; ✦</span></div>
+
+        <div class="letter" id="confessLetter">
+          Setiap hari bersamamu terasa seperti halaman terbaik dari buku yang belum selesai kubaca.
+          Kamu bukan hanya seseorang yang aku sukai — kamu adalah alasan aku tersenyum tanpa sebab,
+          alasan aku ingin menjadi versi terbaik dari diriku sendiri.<br><br>
+          Aku tahu ini mungkin tiba-tiba, tapi hatiku sudah lama menyimpan rasa ini dengan sabar.
+          Dan aku tidak ingin terus berpura-pura biasa — karena bagimu, aku tidak pernah bisa biasa.
+        </div>
+
+        <p class="question">🌸 &nbsp; Maukah kamu menjadi orang spesialku?</p>
+
+        <div style="display:flex;flex-direction:column;align-items:center;gap:.5rem;">
+          <div class="btn-row" id="btnRow">
+            <button class="btn-yes" onclick="handleYes()">💖 Iya, Mau!</button>
+            <button id="btnNo">Enggak 🙈</button>
+          </div>
+          <p id="noHint"></p>
+        </div>
+      </div>
+
+      <!-- Yes screen -->
+      <div class="screen" id="screenYes">
+        <div class="result-icon">🥰</div>
+        <h2 class="result-title">Yeay!! Kamu Menerimaku! 🎉</h2>
+        <p class="result-msg">
+          Terima kasih sudah memberi kesempatan ini. Aku berjanji akan selalu ada untukmu,
+          membuat harimu lebih berwarna, dan mencintaimu dengan tulus setiap harinya. 💕
+        </p>
+        <a id="waLink" class="wa-btn" href="#" target="_blank">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          Balas ke WhatsApp-nya 💬
+        </a>
+        <p class="wa-note">Pesan sudah terisi otomatis — tinggal pencet kirim ✨</p>
+      </div>
+
+    </div><!-- end pageConfession -->
+  </div>
+</div>
+
+<script>
+/* ── CURSOR ── */
+const cur = document.getElementById('cur');
+document.addEventListener('mousemove', e => { cur.style.left=e.clientX+'px'; cur.style.top=e.clientY+'px'; });
+
+/* ── STARS ── */
+for (let i=0;i<100;i++) {
+  const s=document.createElement('div'); s.className='star';
+  const sz=0.6+Math.random()*2;
+  s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;top:${Math.random()*100}vh;animation-duration:${2+Math.random()*4}s;animation-delay:${Math.random()*6}s;`;
+  document.getElementById('stars').appendChild(s);
+}
+
+/* ── PARTICLES ── */
+const pc=document.getElementById('particleCanvas'), px=pc.getContext('2d');
+function resizePC(){pc.width=innerWidth;pc.height=innerHeight;} resizePC();
+window.addEventListener('resize',resizePC);
+const PARTS=Array.from({length:35},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:.5+Math.random()*1.4,vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28,a:Math.random(),da:.003+Math.random()*.005}));
+(function drawP(){
+  px.clearRect(0,0,pc.width,pc.height);
+  PARTS.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;p.a+=p.da;
+    if(p.a>1||p.a<0)p.da*=-1;
+    if(p.x<0)p.x=pc.width;if(p.x>pc.width)p.x=0;
+    if(p.y<0)p.y=pc.height;if(p.y>pc.height)p.y=0;
+    px.beginPath();px.arc(p.x,p.y,p.r,0,Math.PI*2);
+    px.fillStyle=`rgba(240,150,180,${p.a*.5})`;px.fill();
+  });
+  requestAnimationFrame(drawP);
+})();
+
+/* ══ SETUP PAGE LOGIC ══ */
+function generateLink() {
+  const name  = document.getElementById('senderName').value.trim();
+  const phone = document.getElementById('phoneInput').value.trim();
+  const err   = document.getElementById('inputErr');
+
+  if (!name) { err.textContent = 'Nama kamu belum diisi 😅'; return; }
+  if (!phone || phone.length < 9 || phone.length > 13) {
+    err.textContent = 'Nomor WA tidak valid (tanpa angka 0 di depan) 😅'; return;
+  }
+  err.textContent = '';
+
+  // Build link with query params
+  const base   = window.location.href.split('?')[0];
+  const params = new URLSearchParams({ name: name, phone: '62' + phone });
+  const link   = base + '?' + params.toString();
+
+  document.getElementById('linkText').textContent = link;
+  document.getElementById('linkBox').style.display = 'block';
+  document.getElementById('copyNote').textContent = '';
+}
+
+function copyLink() {
+  const link = document.getElementById('linkText').textContent;
+  navigator.clipboard.writeText(link).then(() => {
+    document.getElementById('copyNote').textContent = '✅ Link berhasil disalin!';
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = link; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    document.getElementById('copyNote').textContent = '✅ Link berhasil disalin!';
+  });
+}
+
+/* ══ CHECK URL PARAMS — show confession page if params exist ══ */
+const urlParams = new URLSearchParams(window.location.search);
+const paramPhone = urlParams.get('phone');
+const paramName  = urlParams.get('name');
+
+if (paramPhone && paramName) {
+  // Show confession page
+  document.getElementById('pageSetup').style.display = 'none';
+  document.getElementById('pageConfession').style.display = 'block';
+
+  // Personalise title
+  document.getElementById('confessTitle').textContent =
+    `${paramName} Ada Sesuatu yang Ingin Dikatakan… 💌`;
+
+  // Set up WA link for yes button
+  const msg = encodeURIComponent(
+    `💖 YEAY!! Aku mau jadi orang spesialmu, ${paramName}!\n\nTerima kasih sudah berani mengungkapkan perasaanmu 🥰\nAku senang banget! 🌸✨`
+  );
+  document.getElementById('waLink').href = `https://wa.me/${paramPhone}?text=${msg}`;
+
+  /* ── NO button dodge ── */
+  const btnNo  = document.getElementById('btnNo');
+  const btnRow = document.getElementById('btnRow');
+  let noCount  = 0;
+  let noSide   = 'right';
+  const emojis = ['🙈','😅','😬','🫣','😶','🤭','😝'];
+  const hints  = ['Eh, geser dulu ya~ 😅','Hehe, kabur lagi 🙈','Masa enggak sih… 🥺','Ayo dong! 💕','Yah lari lagi 😆','Masih mau coba? 🌸','Hampir kena tadi! 😝'];
+
+  function dodge() {
+    noSide = noSide==='right' ? 'left' : 'right';
+    if (noSide==='right') btnRow.appendChild(btnNo);
+    else btnRow.insertBefore(btnNo, btnRow.firstChild);
+    btnNo.textContent = `Enggak ${emojis[noCount%emojis.length]}`;
+    btnNo.classList.remove('wiggling');
+    void btnNo.offsetWidth;
+    btnNo.classList.add('wiggling');
+    btnNo.addEventListener('animationend',()=>btnNo.classList.remove('wiggling'),{once:true});
+    document.getElementById('noHint').textContent = hints[noCount%hints.length];
+    noCount++;
+  }
+  btnNo.addEventListener('mouseenter', dodge);
+  btnNo.addEventListener('touchstart', e=>{e.preventDefault();dodge();});
+  btnNo.addEventListener('click', e=>{e.preventDefault();dodge();});
+}
+
+/* ── YES ── */
+function handleYes() {
+  document.getElementById('screenMain').style.display = 'none';
+  document.getElementById('screenYes').classList.add('active');
+  for (let i=0;i<25;i++) setTimeout(()=>spawnHeart(), i*100);
+  launchConfetti();
+}
+
+/* ── FLOATING HEARTS ── */
+function spawnHeart() {
+  const h=document.createElement('div'); h.className='fheart';
+  h.textContent=['💖','💗','💕','🌸','✨','💞'][Math.floor(Math.random()*6)];
+  h.style.cssText=`left:${10+Math.random()*80}vw;top:${20+Math.random()*55}vh;font-size:${1+Math.random()*.8}rem;animation-duration:${1.4+Math.random()*.8}s;`;
+  document.body.appendChild(h); h.addEventListener('animationend',()=>h.remove());
+}
+
+/* ── CONFETTI ── */
+const cc=document.getElementById('confettiCanvas'),cx=cc.getContext('2d');
+function resizeCC(){cc.width=innerWidth;cc.height=innerHeight;} resizeCC(); window.addEventListener('resize',resizeCC);
+let pieces=[];
+function launchConfetti(){
+  const cols=['#f4a7c0','#e07899','#e8cc80','#c8e6c9','#ffffff','#ffd6e7','#b5ead7'];
+  for(let i=0;i<130;i++) pieces.push({x:Math.random()*innerWidth,y:-20,w:5+Math.random()*7,h:9+Math.random()*11,color:cols[Math.floor(Math.random()*cols.length)],vx:(Math.random()-.5)*3.2,vy:1.8+Math.random()*3.2,angle:Math.random()*360,spin:(Math.random()-.5)*6,alpha:1});
+  animConf();
+}
+function animConf(){
+  cx.clearRect(0,0,cc.width,cc.height);
+  pieces=pieces.filter(p=>p.alpha>.02);
+  pieces.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;p.angle+=p.spin;
+    if(p.y>cc.height*.8)p.alpha-=.03;
+    cx.save();cx.globalAlpha=p.alpha;cx.translate(p.x,p.y);cx.rotate(p.angle*Math.PI/180);
+    cx.fillStyle=p.color;cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);cx.restore();
+  });
+  if(pieces.length) requestAnimationFrame(animConf);
+}
+</script>
+</body>
+</html>
