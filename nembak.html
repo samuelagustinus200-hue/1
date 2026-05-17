@@ -26,6 +26,32 @@ body { min-height:100vh; background:var(--bg); font-family:'Jost',sans-serif; co
 canvas{position:fixed;inset:0;z-index:2;pointer-events:none;}
 #confettiCanvas{z-index:100;}
 #cur{width:20px;height:20px;border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(240,160,190,0.85) 0%,transparent 70%);mix-blend-mode:screen;}
+
+/* music player floating */
+#musicBtn {
+  position:fixed; bottom:1.5rem; right:1.5rem; z-index:200;
+  width:46px; height:46px; border-radius:50%;
+  background:rgba(240,120,160,0.2);
+  border:1.5px solid rgba(240,160,190,0.3);
+  color:var(--rose); font-size:1.2rem;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; backdrop-filter:blur(10px);
+  transition:background .2s, transform .2s;
+  animation: musicPulse 2s ease-in-out infinite;
+}
+#musicBtn:hover{background:rgba(240,120,160,0.35); transform:scale(1.1);}
+@keyframes musicPulse{0%,100%{box-shadow:0 0 0 0 rgba(240,120,160,0.4);}50%{box-shadow:0 0 0 8px rgba(240,120,160,0);}}
+
+/* open counter badge */
+#openBadge {
+  position:fixed; top:1rem; right:1rem; z-index:200;
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(240,160,190,0.2);
+  border-radius:20px; padding:.3rem .85rem;
+  font-size:.72rem; letter-spacing:.06em; color:var(--muted);
+  backdrop-filter:blur(10px); display:none;
+}
+
 .page{position:relative;z-index:10;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem 1rem;}
 .card{
   position:relative;background:var(--glass);
@@ -39,85 +65,96 @@ canvas{position:fixed;inset:0;z-index:2;pointer-events:none;}
 @keyframes shimmer{0%,100%{opacity:.3;}50%{opacity:.85;}}
 @keyframes rise{from{opacity:0;transform:translateY(44px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
 
-.heart-wrap{display:flex;align-items:center;justify-content:center;margin-bottom:1.4rem;}
-.heart-svg{width:70px;height:70px;filter:drop-shadow(0 0 20px rgba(210,100,140,0.8));animation:heartbeat 1.8s ease-in-out infinite;}
+.heart-wrap{display:flex;align-items:center;justify-content:center;margin-bottom:1.3rem;}
+.heart-svg{width:66px;height:66px;filter:drop-shadow(0 0 20px rgba(210,100,140,0.8));animation:heartbeat 1.8s ease-in-out infinite;}
 @keyframes heartbeat{0%,100%{transform:scale(1);}15%{transform:scale(1.18);}30%{transform:scale(1);}45%{transform:scale(1.1);}60%{transform:scale(1);}}
 
-h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(1.5rem,5vw,2.2rem);line-height:1.2;letter-spacing:.02em;background:linear-gradient(135deg,var(--rose) 0%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.4rem;}
-.sub{font-size:.83rem;letter-spacing:.06em;color:var(--muted);margin-bottom:1.4rem;line-height:1.6;}
-.ornament{display:flex;align-items:center;gap:.6rem;margin:1.1rem 0;}
+h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(1.4rem,5vw,2rem);line-height:1.25;letter-spacing:.02em;background:linear-gradient(135deg,var(--rose) 0%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.35rem;}
+.sub{font-size:.82rem;letter-spacing:.06em;color:var(--muted);margin-bottom:1.3rem;line-height:1.6;}
+.ornament{display:flex;align-items:center;gap:.6rem;margin:1rem 0;}
 .ornament::before,.ornament::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(240,160,190,0.35),transparent);}
 .ornament span{font-size:10px;letter-spacing:.18em;color:var(--rose);opacity:.6;}
 
 /* inputs */
-.field-label{display:block;text-align:left;font-size:.75rem;letter-spacing:.1em;color:var(--rose);margin-bottom:.45rem;opacity:.85;}
-.input-wrap{position:relative;margin-bottom:1rem;}
-.input-prefix{position:absolute;left:1.1rem;top:50%;transform:translateY(-50%);font-size:.92rem;color:var(--muted);pointer-events:none;}
-.phone-input{width:100%;padding:.8rem 1rem .8rem 3rem;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.2);border-radius:50px;color:#fff;font-family:'Jost',sans-serif;font-size:.92rem;letter-spacing:.05em;outline:none;transition:border-color .2s;}
+.field-label{display:block;text-align:left;font-size:.74rem;letter-spacing:.1em;color:var(--rose);margin-bottom:.4rem;opacity:.85;}
+.input-wrap{position:relative;margin-bottom:.9rem;}
+.input-prefix{position:absolute;left:1.1rem;top:50%;transform:translateY(-50%);font-size:.9rem;color:var(--muted);pointer-events:none;}
+.phone-input{width:100%;padding:.78rem 1rem .78rem 3rem;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.2);border-radius:50px;color:#fff;font-family:'Jost',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s;}
 .phone-input::-webkit-outer-spin-button,.phone-input::-webkit-inner-spin-button{-webkit-appearance:none;}
 .phone-input[type=number]{-moz-appearance:textfield;}
 .phone-input:focus{border-color:rgba(240,160,190,0.6);}
-.text-input,.date-input{width:100%;padding:.8rem 1rem;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.2);border-radius:50px;color:#fff;font-family:'Jost',sans-serif;font-size:.92rem;letter-spacing:.05em;outline:none;transition:border-color .2s;margin-bottom:1rem;}
+.text-input{width:100%;padding:.78rem 1rem;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.2);border-radius:50px;color:#fff;font-family:'Jost',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s;margin-bottom:.9rem;}
 .text-input::placeholder{color:rgba(255,255,255,0.25);}
-.text-input:focus,.date-input:focus{border-color:rgba(240,160,190,0.6);}
-/* date input styling */
-.date-input{color-scheme:dark;}
+.text-input:focus{border-color:rgba(240,160,190,0.6);}
+.textarea-input{width:100%;padding:.9rem 1.1rem;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.2);border-radius:18px;color:#fff;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1rem;outline:none;transition:border-color .2s;margin-bottom:.9rem;resize:vertical;min-height:110px;line-height:1.7;}
+.textarea-input::placeholder{color:rgba(255,255,255,0.2);font-style:italic;}
+.textarea-input:focus{border-color:rgba(240,160,190,0.6);}
+.date-input{width:100%;padding:.78rem 1rem;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.2);border-radius:50px;color:#fff;font-family:'Jost',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s;color-scheme:dark;}
+.date-input:focus{border-color:rgba(240,160,190,0.6);}
 
-/* expired toggle */
 .toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;padding:0 .2rem;}
-.toggle-row span{font-size:.82rem;letter-spacing:.05em;color:var(--muted);}
+.toggle-row span{font-size:.81rem;letter-spacing:.04em;color:var(--muted);}
 .toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
 .toggle input{opacity:0;width:0;height:0;}
 .slider{position:absolute;inset:0;background:rgba(255,255,255,0.15);border-radius:50px;cursor:pointer;transition:.3s;}
 .slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;}
-.toggle input:checked + .slider{background:var(--rose);}
-.toggle input:checked + .slider::before{transform:translateX(20px);}
-
-.expire-box{display:none;margin-bottom:1rem;animation:fadeIn .3s ease;}
+.toggle input:checked+.slider{background:var(--rose);}
+.toggle input:checked+.slider::before{transform:translateX(20px);}
+.expire-box{display:none;margin-bottom:.9rem;animation:fadeIn .3s ease;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
 
-.btn-generate{width:100%;padding:.85rem;background:linear-gradient(135deg,#e0789a,#b84060);color:#fff;border:none;border-radius:50px;font-family:'Jost',sans-serif;font-size:.95rem;letter-spacing:.1em;cursor:pointer;box-shadow:0 8px 28px rgba(184,64,96,.4);transition:transform .2s,box-shadow .2s;}
+.section-divider{font-size:.7rem;letter-spacing:.15em;color:rgba(240,160,190,.35);text-align:center;margin:.5rem 0 .9rem;text-transform:uppercase;}
+
+.btn-generate{width:100%;padding:.85rem;background:linear-gradient(135deg,#e0789a,#b84060);color:#fff;border:none;border-radius:50px;font-family:'Jost',sans-serif;font-size:.93rem;letter-spacing:.1em;cursor:pointer;box-shadow:0 8px 28px rgba(184,64,96,.4);transition:transform .2s,box-shadow .2s;margin-top:.3rem;}
 .btn-generate:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(184,64,96,.55);}
 
-.link-box{display:none;margin-top:1.3rem;background:rgba(255,255,255,0.07);border:1px solid rgba(240,160,190,0.2);border-radius:16px;padding:1.2rem;}
-.link-box p{font-size:.78rem;color:var(--muted);margin-bottom:.6rem;letter-spacing:.05em;}
-.link-text{font-size:.73rem;color:var(--rose);word-break:break-all;line-height:1.6;background:rgba(240,120,160,.08);border-radius:10px;padding:.6rem .8rem;margin-bottom:.8rem;display:block;font-family:'Jost',sans-serif;}
-.expire-badge{display:inline-block;font-size:.72rem;color:var(--gold);background:rgba(232,204,128,.1);border:1px solid rgba(232,204,128,.25);border-radius:20px;padding:.25rem .75rem;margin-bottom:.8rem;letter-spacing:.05em;}
-.btn-copy{width:100%;padding:.7rem;background:rgba(240,120,160,.15);color:var(--rose);border:1px solid rgba(240,160,190,.3);border-radius:50px;font-family:'Jost',sans-serif;font-size:.85rem;letter-spacing:.08em;cursor:pointer;transition:background .2s;}
-.btn-copy:hover{background:rgba(240,120,160,.25);}
-.copy-note{font-size:.72rem;color:rgba(240,160,190,.4);margin-top:.5rem;display:block;}
-.err{font-size:.76rem;color:#f4a7a7;margin-bottom:.5rem;min-height:1.1em;letter-spacing:.04em;}
+.link-box{display:none;margin-top:1.2rem;background:rgba(255,255,255,0.06);border:1px solid rgba(240,160,190,0.2);border-radius:16px;padding:1.2rem;}
+.link-box-title{font-size:.78rem;color:var(--muted);margin-bottom:.6rem;letter-spacing:.04em;}
+.link-text{font-size:.72rem;color:var(--rose);word-break:break-all;line-height:1.6;background:rgba(240,120,160,.08);border-radius:10px;padding:.6rem .8rem;margin-bottom:.8rem;display:block;}
+.expire-badge{display:inline-block;font-size:.7rem;color:var(--gold);background:rgba(232,204,128,.1);border:1px solid rgba(232,204,128,.25);border-radius:20px;padding:.22rem .7rem;margin-bottom:.8rem;letter-spacing:.04em;}
+.btn-copy{width:100%;padding:.68rem;background:rgba(240,120,160,.15);color:var(--rose);border:1px solid rgba(240,160,190,.3);border-radius:50px;font-family:'Jost',sans-serif;font-size:.83rem;letter-spacing:.08em;cursor:pointer;transition:background .2s;}
+.btn-copy:hover{background:rgba(240,120,160,.28);}
+.copy-note{font-size:.7rem;color:rgba(240,160,190,.4);margin-top:.45rem;display:block;}
+
+/* open counter in setup */
+.counter-setup{display:none;margin-top:.8rem;background:rgba(255,255,255,0.04);border:1px solid rgba(240,160,190,.12);border-radius:12px;padding:.8rem 1rem;text-align:center;}
+.counter-setup p{font-size:.78rem;color:var(--muted);letter-spacing:.04em;}
+.counter-num{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--rose);display:block;line-height:1.2;}
+
+.err{font-size:.74rem;color:#f4a7a7;margin-bottom:.45rem;min-height:1em;letter-spacing:.04em;}
 
 /* ── confession ── */
-.letter{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(.96rem,2.5vw,1.08rem);line-height:1.95;color:rgba(245,232,238,.82);background:rgba(240,120,160,.05);border:1px solid rgba(240,160,190,.1);border-radius:18px;padding:1.4rem 1.5rem 1.4rem 2rem;text-align:left;margin-bottom:1.5rem;position:relative;}
-.letter::before{content:'\201C';font-family:'Cormorant Garamond',serif;font-size:5.5rem;line-height:0;color:rgba(240,130,160,.16);position:absolute;top:1.8rem;left:.5rem;pointer-events:none;}
-.question{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(1.1rem,3.5vw,1.38rem);letter-spacing:.04em;margin-bottom:1.4rem;}
+.from-tag{font-size:.72rem;letter-spacing:.12em;color:rgba(240,160,190,.5);margin-bottom:.3rem;display:block;}
+.letter{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(.95rem,2.5vw,1.07rem);line-height:1.95;color:rgba(245,232,238,.84);background:rgba(240,120,160,.05);border:1px solid rgba(240,160,190,.1);border-radius:18px;padding:1.4rem 1.5rem 1.4rem 2rem;text-align:left;margin-bottom:1.4rem;position:relative;}
+.letter::before{content:'\201C';font-family:'Cormorant Garamond',serif;font-size:5rem;line-height:0;color:rgba(240,130,160,.16);position:absolute;top:1.8rem;left:.5rem;pointer-events:none;}
+.question{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(1.05rem,3.5vw,1.32rem);letter-spacing:.04em;margin-bottom:1.3rem;}
 .btn-row{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;}
-.btn-yes{font-family:'Jost',sans-serif;font-weight:400;font-size:.92rem;letter-spacing:.08em;border:none;border-radius:50px;padding:.78rem 2rem;cursor:pointer;background:linear-gradient(135deg,#e0789a,#b84060);color:#fff;box-shadow:0 8px 28px rgba(184,64,96,.45);flex-shrink:0;transition:transform .2s,box-shadow .2s;}
+.btn-yes{font-family:'Jost',sans-serif;font-weight:400;font-size:.9rem;letter-spacing:.08em;border:none;border-radius:50px;padding:.78rem 2rem;cursor:pointer;background:linear-gradient(135deg,#e0789a,#b84060);color:#fff;box-shadow:0 8px 28px rgba(184,64,96,.45);flex-shrink:0;transition:transform .2s,box-shadow .2s;}
 .btn-yes:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 14px 36px rgba(184,64,96,.6);}
-#btnNo{font-family:'Jost',sans-serif;font-weight:400;font-size:.92rem;letter-spacing:.08em;border-radius:50px;padding:.78rem 1.6rem;cursor:pointer;background:rgba(255,255,255,0.13);color:#ffffff;border:1.5px solid rgba(255,255,255,0.4);flex-shrink:0;}
+#btnNo{font-family:'Jost',sans-serif;font-weight:400;font-size:.9rem;letter-spacing:.08em;border-radius:50px;padding:.78rem 1.6rem;cursor:pointer;background:rgba(255,255,255,0.13);color:#ffffff;border:1.5px solid rgba(255,255,255,0.4);flex-shrink:0;}
 @keyframes wiggle{0%{transform:rotate(0) scale(1);}20%{transform:rotate(-8deg) scale(1.08);}40%{transform:rotate(8deg) scale(1.05);}60%{transform:rotate(-5deg) scale(1.03);}80%{transform:rotate(3deg) scale(1.01);}100%{transform:rotate(0) scale(1);}}
 #btnNo.wiggling{animation:wiggle .45s ease forwards;}
-#noHint{min-height:1.2em;font-size:.76rem;letter-spacing:.07em;color:rgba(240,160,190,.6);margin-top:.5rem;}
+#noHint{min-height:1.2em;font-size:.74rem;letter-spacing:.07em;color:rgba(240,160,190,.6);margin-top:.5rem;}
 
-/* result */
 .screen{display:none;flex-direction:column;align-items:center;gap:1.1rem;}
 .screen.active{display:flex;animation:rise .75s ease both;}
-.result-icon{font-size:66px;animation:floatIcon 3s ease-in-out infinite;}
+.result-icon{font-size:64px;animation:floatIcon 3s ease-in-out infinite;}
 @keyframes floatIcon{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
-.result-title{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(1.5rem,5vw,2.1rem);background:linear-gradient(135deg,var(--rose),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;}
-.result-msg{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem;line-height:1.85;color:var(--muted);text-align:center;max-width:340px;}
-.wa-btn{display:inline-flex;align-items:center;gap:.65rem;background:linear-gradient(135deg,#2ecc71,#1a9950);color:#fff;font-family:'Jost',sans-serif;font-size:.88rem;letter-spacing:.1em;border:none;border-radius:50px;padding:.85rem 2rem;cursor:pointer;text-decoration:none;box-shadow:0 8px 28px rgba(46,204,113,.3);transition:transform .2s,box-shadow .2s;}
+.result-title{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(1.4rem,5vw,2rem);background:linear-gradient(135deg,var(--rose),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;}
+.result-msg{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1rem;line-height:1.85;color:var(--muted);text-align:center;max-width:320px;}
+.wa-btn{display:inline-flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,#2ecc71,#1a9950);color:#fff;font-family:'Jost',sans-serif;font-size:.86rem;letter-spacing:.1em;border:none;border-radius:50px;padding:.82rem 1.9rem;cursor:pointer;text-decoration:none;box-shadow:0 8px 28px rgba(46,204,113,.3);transition:transform .2s,box-shadow .2s;}
 .wa-btn:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(46,204,113,.45);}
-.wa-note{font-size:.7rem;letter-spacing:.06em;color:rgba(245,232,238,.25);}
+.wa-note{font-size:.68rem;letter-spacing:.06em;color:rgba(245,232,238,.22);}
 
-/* expired screen */
-.expired-icon{font-size:60px;animation:floatIcon 3s ease-in-out infinite;}
-.expired-title{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(1.4rem,5vw,2rem);color:var(--muted);text-align:center;}
-.expired-msg{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1rem;line-height:1.8;color:rgba(245,232,238,.4);text-align:center;max-width:300px;}
+.expired-icon{font-size:58px;animation:floatIcon 3s ease-in-out infinite;}
+.expired-title{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(1.3rem,5vw,1.9rem);color:var(--muted);text-align:center;}
+.expired-msg{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.98rem;line-height:1.8;color:rgba(245,232,238,.35);text-align:center;max-width:280px;}
 
 .fheart{position:fixed;pointer-events:none;opacity:0;z-index:50;animation:floatUp linear forwards;}
 @keyframes floatUp{0%{transform:translateY(0) scale(1) rotate(-10deg);opacity:.9;}100%{transform:translateY(-130px) scale(.3) rotate(15deg);opacity:0;}}
+
+/* char counter */
+.char-count{font-size:.68rem;color:rgba(240,160,190,.35);text-align:right;margin-top:-.5rem;margin-bottom:.7rem;padding-right:.3rem;}
 </style>
 </head>
 <body>
@@ -127,6 +164,12 @@ h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(1.5rem
 <div class="stars" id="stars"></div>
 <canvas id="particleCanvas"></canvas>
 <canvas id="confettiCanvas"></canvas>
+<button id="musicBtn" onclick="toggleMusic()" title="Musik">🎵</button>
+
+<!-- hidden audio — gentle lofi piano -->
+<audio id="bgMusic" loop>
+  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+</audio>
 
 <div class="page">
   <div class="card">
@@ -139,13 +182,17 @@ h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(1.5rem
           <path fill="url(#hg)" d="M50 83 C50 83 4 52 4 27 C4 13 15 3 27 3 C35 3 44 8 50 16 C56 8 65 3 73 3 C85 3 96 13 96 27 C96 52 50 83 50 83Z"/>
         </svg>
       </div>
-
       <h1>Buat Link Nembak Kamu</h1>
-      <p class="sub">Isi data kamu, lalu kirim linknya ke dia 💌</p>
+      <p class="sub">Isi data di bawah, lalu kirim linknya ke dia 💌</p>
       <div class="ornament"><span>✦ &nbsp; langkah mudah &nbsp; ✦</span></div>
 
-      <label class="field-label">Nama kamu</label>
+      <p class="section-divider">— Identitas —</p>
+
+      <label class="field-label">Nama kamu (si penembak)</label>
       <input class="text-input" id="senderName" type="text" placeholder="contoh: Raka" maxlength="30"/>
+
+      <label class="field-label">Nama dia (si penerima)</label>
+      <input class="text-input" id="receiverName" type="text" placeholder="contoh: Nabila" maxlength="30"/>
 
       <label class="field-label">Nomor WhatsApp kamu</label>
       <div class="input-wrap">
@@ -153,32 +200,40 @@ h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(1.5rem
         <input class="phone-input" id="phoneInput" type="number" placeholder="8xxxxxxxxxx"/>
       </div>
 
-      <!-- Expired toggle -->
+      <p class="section-divider">— Pesan Cinta —</p>
+      <label class="field-label">Tulis pesan romantis kamu (atau pakai bawaan)</label>
+      <textarea class="textarea-input" id="customMsg" maxlength="600"
+        placeholder="Setiap hari bersamamu terasa seperti halaman terbaik dari buku yang belum selesai kubaca…"></textarea>
+      <p class="char-count"><span id="charCount">0</span>/600</p>
+
+      <p class="section-divider">— Pengaturan —</p>
+
       <div class="toggle-row">
         <span>⏳ &nbsp; Beri batas waktu link</span>
-        <label class="toggle">
-          <input type="checkbox" id="expireToggle" onchange="toggleExpire()"/>
-          <span class="slider"></span>
-        </label>
+        <label class="toggle"><input type="checkbox" id="expireToggle" onchange="toggleExpire()"/><span class="slider"></span></label>
       </div>
-
       <div class="expire-box" id="expireBox">
         <label class="field-label">Link expired pada tanggal</label>
         <input class="date-input" id="expireDate" type="date"/>
-        <p style="font-size:.72rem;color:rgba(240,160,190,.45);margin-top:-.5rem;margin-bottom:.8rem;text-align:left;padding-left:.5rem;">
-          Setelah tanggal ini, link tidak bisa dibuka lagi
-        </p>
+        <p style="font-size:.7rem;color:rgba(240,160,190,.4);margin:.4rem 0 .6rem;text-align:left;padding-left:.4rem;">Setelah tanggal ini link tidak bisa dibuka</p>
       </div>
 
       <p class="err" id="inputErr"></p>
       <button class="btn-generate" onclick="generateLink()">✨ &nbsp; Buat Link Sekarang</button>
 
       <div class="link-box" id="linkBox">
-        <p>🎉 Link siap! Kirim ini ke dia:</p>
+        <p class="link-box-title">🎉 Link siap! Kirim ini ke <span id="toName">dia</span>:</p>
         <span class="link-text" id="linkText"></span>
         <span class="expire-badge" id="expireBadge" style="display:none;"></span>
         <button class="btn-copy" onclick="copyLink()">📋 &nbsp; Salin Link</button>
         <span class="copy-note" id="copyNote"></span>
+      </div>
+
+      <!-- open counter -->
+      <div class="counter-setup" id="counterSetup">
+        <p>👀 Sudah dibuka sebanyak</p>
+        <span class="counter-num" id="counterNum">0</span>
+        <p>kali</p>
       </div>
     </div>
 
@@ -187,32 +242,23 @@ h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(1.5rem
       <div style="display:flex;flex-direction:column;align-items:center;gap:1rem;padding:1rem 0;">
         <div class="expired-icon">⌛</div>
         <h2 class="expired-title">Link Sudah Kedaluwarsa</h2>
-        <p class="expired-msg">
-          Maaf, link ini sudah tidak berlaku lagi.<br><br>
-          Mungkin lain kali ya… 🌸
-        </p>
+        <p class="expired-msg">Maaf, link ini sudah tidak berlaku lagi.<br><br>Mungkin lain kali ya… 🌸</p>
       </div>
     </div>
 
     <!-- ══ CONFESSION PAGE ══ -->
     <div id="pageConfession" style="display:none;">
-
       <div id="screenMain">
         <div class="heart-wrap">
           <svg class="heart-svg" viewBox="0 0 100 90" fill="none">
             <path fill="url(#hg)" d="M50 83 C50 83 4 52 4 27 C4 13 15 3 27 3 C35 3 44 8 50 16 C56 8 65 3 73 3 C85 3 96 13 96 27 C96 52 50 83 50 83Z"/>
           </svg>
         </div>
+        <span class="from-tag" id="fromTag"></span>
         <h1 id="confessTitle"></h1>
         <div class="ornament"><span>✦ &nbsp; dari lubuk hati yang terdalam &nbsp; ✦</span></div>
-        <div class="letter">
-          Setiap hari bersamamu terasa seperti halaman terbaik dari buku yang belum selesai kubaca.
-          Kamu bukan hanya seseorang yang aku sukai — kamu adalah alasan aku tersenyum tanpa sebab,
-          alasan aku ingin menjadi versi terbaik dari diriku sendiri.<br><br>
-          Aku tahu ini mungkin tiba-tiba, tapi hatiku sudah lama menyimpan rasa ini dengan sabar.
-          Dan aku tidak ingin terus berpura-pura biasa — karena bagimu, aku tidak pernah bisa biasa.
-        </div>
-        <p class="question">🌸 &nbsp; Maukah kamu menjadi orang spesialku?</p>
+        <div class="letter" id="confessLetter"></div>
+        <p class="question" id="confessQuestion"></p>
         <div style="display:flex;flex-direction:column;align-items:center;gap:.5rem;">
           <div class="btn-row" id="btnRow">
             <button class="btn-yes" onclick="handleYes()">💖 Iya, Mau!</button>
@@ -224,7 +270,7 @@ h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(1.5rem
 
       <div class="screen" id="screenYes">
         <div class="result-icon">🥰</div>
-        <h2 class="result-title">Yeay!! Kamu Menerimaku! 🎉</h2>
+        <h2 class="result-title" id="yesTitle"></h2>
         <p class="result-msg">Terima kasih sudah memberi kesempatan ini. Aku berjanji akan selalu ada untukmu, mencintaimu dengan tulus setiap harinya. 💕</p>
         <a id="waLink" class="wa-btn" href="#" target="_blank">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -232,19 +278,19 @@ h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(1.5rem
         </a>
         <p class="wa-note">Pesan sudah terisi otomatis — tinggal pencet kirim ✨</p>
       </div>
-
     </div>
-  </div>
-</div>
+
+  </div><!-- card -->
+</div><!-- page -->
 
 <script>
 /* ── CURSOR ── */
 const cur = document.getElementById('cur');
-document.addEventListener('mousemove', e => { cur.style.left=e.clientX+'px'; cur.style.top=e.clientY+'px'; });
+document.addEventListener('mousemove', e=>{cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';});
 
 /* ── STARS ── */
-for (let i=0;i<100;i++) {
-  const s=document.createElement('div'); s.className='star';
+for(let i=0;i<100;i++){
+  const s=document.createElement('div');s.className='star';
   const sz=0.6+Math.random()*2;
   s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;top:${Math.random()*100}vh;animation-duration:${2+Math.random()*4}s;animation-delay:${Math.random()*6}s;`;
   document.getElementById('stars').appendChild(s);
@@ -260,92 +306,157 @@ const PARTS=Array.from({length:35},()=>({x:Math.random()*innerWidth,y:Math.rando
   requestAnimationFrame(drawP);
 })();
 
+/* ── MUSIC ── */
+const music = document.getElementById('bgMusic');
+let musicOn = false;
+function toggleMusic(){
+  if(musicOn){music.pause();document.getElementById('musicBtn').textContent='🎵';musicOn=false;}
+  else{music.play().catch(()=>{});document.getElementById('musicBtn').textContent='🔇';musicOn=true;}
+}
+// auto-attempt play on first interaction
+document.addEventListener('click', ()=>{
+  if(!musicOn){music.play().then(()=>{musicOn=true;document.getElementById('musicBtn').textContent='🔇';}).catch(()=>{});}
+},{once:true});
+
+/* ── CHAR COUNTER ── */
+document.getElementById('customMsg').addEventListener('input', function(){
+  document.getElementById('charCount').textContent = this.value.length;
+});
+
+/* ── OPEN COUNTER (localStorage per unique link key) ── */
+function getCounterKey(name, phone){
+  return `opens_${name}_${phone}`;
+}
+function incrementCounter(key){
+  const n = parseInt(localStorage.getItem(key)||'0') + 1;
+  localStorage.setItem(key, n);
+  return n;
+}
+function getCounter(key){
+  return parseInt(localStorage.getItem(key)||'0');
+}
+
 /* ── SETUP ── */
-function toggleExpire() {
-  const on = document.getElementById('expireToggle').checked;
-  document.getElementById('expireBox').style.display = on ? 'block' : 'none';
-  if (on) {
-    // default: 7 days from today
-    const d = new Date(); d.setDate(d.getDate()+7);
-    document.getElementById('expireDate').value = d.toISOString().split('T')[0];
-    // min = tomorrow
-    const tom = new Date(); tom.setDate(tom.getDate()+1);
-    document.getElementById('expireDate').min = tom.toISOString().split('T')[0];
+function toggleExpire(){
+  const on=document.getElementById('expireToggle').checked;
+  document.getElementById('expireBox').style.display=on?'block':'none';
+  if(on){
+    const d=new Date();d.setDate(d.getDate()+7);
+    document.getElementById('expireDate').value=d.toISOString().split('T')[0];
+    const tom=new Date();tom.setDate(tom.getDate()+1);
+    document.getElementById('expireDate').min=tom.toISOString().split('T')[0];
   }
 }
 
-function generateLink() {
-  const name  = document.getElementById('senderName').value.trim();
-  const phone = document.getElementById('phoneInput').value.trim();
-  const err   = document.getElementById('inputErr');
-  const useExpire = document.getElementById('expireToggle').checked;
-  const expireVal = document.getElementById('expireDate').value;
+function generateLink(){
+  const sender   = document.getElementById('senderName').value.trim();
+  const receiver = document.getElementById('receiverName').value.trim();
+  const phone    = document.getElementById('phoneInput').value.trim();
+  const msg      = document.getElementById('customMsg').value.trim();
+  const err      = document.getElementById('inputErr');
+  const useExp   = document.getElementById('expireToggle').checked;
+  const expVal   = document.getElementById('expireDate').value;
 
-  if (!name) { err.textContent='Nama kamu belum diisi 😅'; return; }
-  if (!phone || phone.length < 9 || phone.length > 13) { err.textContent='Nomor WA tidak valid (tanpa angka 0 di depan) 😅'; return; }
-  if (useExpire && !expireVal) { err.textContent='Pilih tanggal expired dulu ya 😅'; return; }
-  err.textContent = '';
+  if(!sender){err.textContent='Nama kamu belum diisi 😅';return;}
+  if(!receiver){err.textContent='Nama dia belum diisi 😅';return;}
+  if(!phone||phone.length<9||phone.length>13){err.textContent='Nomor WA tidak valid (tanpa angka 0 di depan) 😅';return;}
+  if(useExp&&!expVal){err.textContent='Pilih tanggal expired dulu 😅';return;}
+  err.textContent='';
 
   const base   = window.location.href.split('?')[0];
-  const params = new URLSearchParams({ name, phone:'62'+phone });
-  if (useExpire) params.set('exp', expireVal);
-  const link = base + '?' + params.toString();
+  const params = new URLSearchParams({from:sender, to:receiver, phone:'62'+phone});
+  if(msg) params.set('msg', msg);
+  if(useExp) params.set('exp', expVal);
+  const link = base+'?'+params.toString();
 
   document.getElementById('linkText').textContent = link;
+  document.getElementById('toName').textContent   = receiver;
   document.getElementById('linkBox').style.display = 'block';
 
   const badge = document.getElementById('expireBadge');
-  if (useExpire) {
-    const d = new Date(expireVal);
-    badge.textContent = `⏳ Expired: ${d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}`;
-    badge.style.display = 'inline-block';
-  } else {
-    badge.style.display = 'none';
-  }
-  document.getElementById('copyNote').textContent = '';
+  if(useExp){
+    const d=new Date(expVal);
+    badge.textContent=`⏳ Expired: ${d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}`;
+    badge.style.display='inline-block';
+  } else { badge.style.display='none'; }
+
+  // Show counter
+  const key = getCounterKey(sender, '62'+phone);
+  const count = getCounter(key);
+  document.getElementById('counterNum').textContent = count;
+  document.getElementById('counterSetup').style.display = 'block';
+  document.getElementById('copyNote').textContent='';
 }
 
-function copyLink() {
-  const link = document.getElementById('linkText').textContent;
+function copyLink(){
+  const link=document.getElementById('linkText').textContent;
   navigator.clipboard.writeText(link).catch(()=>{
     const ta=document.createElement('textarea');ta.value=link;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
   });
-  document.getElementById('copyNote').textContent = '✅ Link berhasil disalin!';
+  document.getElementById('copyNote').textContent='✅ Link berhasil disalin!';
 }
 
 /* ══ CHECK URL PARAMS ══ */
-const urlParams  = new URLSearchParams(window.location.search);
-const paramPhone = urlParams.get('phone');
-const paramName  = urlParams.get('name');
-const paramExp   = urlParams.get('exp');
+const urlParams   = new URLSearchParams(window.location.search);
+const paramPhone  = urlParams.get('phone');
+const paramFrom   = urlParams.get('from');
+const paramTo     = urlParams.get('to');
+const paramMsg    = urlParams.get('msg');
+const paramExp    = urlParams.get('exp');
 
-if (paramPhone && paramName) {
-  document.getElementById('pageSetup').style.display = 'none';
+if(paramPhone && paramFrom){
+  document.getElementById('pageSetup').style.display='none';
+  document.getElementById('musicBtn').style.display='flex';
 
   // Check expired
-  if (paramExp) {
-    const expDate  = new Date(paramExp);
-    expDate.setHours(23,59,59,999); // end of that day
-    const now = new Date();
-    if (now > expDate) {
-      document.getElementById('pageExpired').style.display = 'block';
-    } else {
-      showConfession();
-    }
-  } else {
-    showConfession();
-  }
+  if(paramExp){
+    const expDate=new Date(paramExp);expDate.setHours(23,59,59,999);
+    if(new Date()>expDate){
+      document.getElementById('pageExpired').style.display='block';
+    } else { showConfession(); }
+  } else { showConfession(); }
 }
 
-function showConfession() {
-  document.getElementById('pageConfession').style.display = 'block';
-  document.getElementById('confessTitle').textContent = `${paramName} Ada Sesuatu yang Ingin Dikatakan… 💌`;
-  const msg = encodeURIComponent(`💖 YEAY!! Aku mau jadi orang spesialmu, ${paramName}!\n\nTerima kasih sudah berani mengungkapkan perasaanmu 🥰\nAku senang banget! 🌸✨`);
-  document.getElementById('waLink').href = `https://wa.me/${paramPhone}?text=${msg}`;
+function showConfession(){
+  document.getElementById('pageConfession').style.display='block';
+
+  // Increment open counter
+  const key = getCounterKey(paramFrom, paramPhone);
+  incrementCounter(key);
+
+  // Show open badge
+  const badge = document.getElementById('openBadge');
+  // Don't show counter to receiver — only sender knows
+
+  // Personalise
+  const toName = paramTo || 'Kamu';
+  document.getElementById('fromTag').textContent = `💌 Pesan dari ${paramFrom}`;
+  document.getElementById('confessTitle').textContent = `Untuk ${toName} yang Spesial…`;
+  document.getElementById('yesTitle').textContent = `Yeay!! ${toName} Menerimaku! 🎉`;
+
+  // Custom or default message
+  const defaultMsg = `Setiap hari bersamamu terasa seperti halaman terbaik dari buku yang belum selesai kubaca. Kamu bukan hanya seseorang yang aku sukai — kamu adalah alasan aku tersenyum tanpa sebab, alasan aku ingin menjadi versi terbaik dari diriku sendiri.<br><br>Aku tahu ini mungkin tiba-tiba, tapi hatiku sudah lama menyimpan rasa ini dengan sabar. Dan aku tidak ingin terus berpura-pura biasa — karena bagimu, aku tidak pernah bisa biasa.`;
+  document.getElementById('confessLetter').innerHTML = paramMsg
+    ? paramMsg.replace(/\n/g,'<br>')
+    : defaultMsg;
+
+  document.getElementById('confessQuestion').innerHTML =
+    `🌸 &nbsp; Maukah kamu menjadi orang spesial ${paramFrom}?`;
+
+  // WA link
+  const waMsg = encodeURIComponent(
+    `💖 YEAY!! Aku mau jadi orang spesialmu, ${paramFrom}!\n\nTerima kasih sudah berani mengungkapkan perasaanmu 🥰\nAku senang banget! 🌸✨`
+  );
+  document.getElementById('waLink').href=`https://wa.me/${paramPhone}?text=${waMsg}`;
+
+  // Auto play music on first interaction
+  document.addEventListener('click',()=>{
+    if(!musicOn){music.play().then(()=>{musicOn=true;document.getElementById('musicBtn').textContent='🔇';}).catch(()=>{});}
+  },{once:true});
 
   /* no button dodge */
-  const btnNo=document.getElementById('btnNo'), btnRow=document.getElementById('btnRow');
-  let noCount=0, noSide='right';
+  const btnNo=document.getElementById('btnNo'),btnRow=document.getElementById('btnRow');
+  let noCount=0,noSide='right';
   const emojis=['🙈','😅','😬','🫣','😶','🤭','😝'];
   const hints=['Eh, geser dulu ya~ 😅','Hehe, kabur lagi 🙈','Masa enggak sih… 🥺','Ayo dong! 💕','Yah lari lagi 😆','Masih mau coba? 🌸','Hampir kena tadi! 😝'];
   function dodge(){
@@ -353,7 +464,7 @@ function showConfession() {
     if(noSide==='right') btnRow.appendChild(btnNo);
     else btnRow.insertBefore(btnNo,btnRow.firstChild);
     btnNo.textContent=`Enggak ${emojis[noCount%emojis.length]}`;
-    btnNo.classList.remove('wiggling'); void btnNo.offsetWidth; btnNo.classList.add('wiggling');
+    btnNo.classList.remove('wiggling');void btnNo.offsetWidth;btnNo.classList.add('wiggling');
     btnNo.addEventListener('animationend',()=>btnNo.classList.remove('wiggling'),{once:true});
     document.getElementById('noHint').textContent=hints[noCount%hints.length];
     noCount++;
@@ -364,19 +475,19 @@ function showConfession() {
 }
 
 /* ── YES ── */
-function handleYes() {
+function handleYes(){
   document.getElementById('screenMain').style.display='none';
   document.getElementById('screenYes').classList.add('active');
-  for(let i=0;i<25;i++) setTimeout(()=>spawnHeart(),i*100);
+  for(let i=0;i<28;i++) setTimeout(()=>spawnHeart(),i*90);
   launchConfetti();
 }
 
 /* ── HEARTS ── */
 function spawnHeart(){
-  const h=document.createElement('div'); h.className='fheart';
+  const h=document.createElement('div');h.className='fheart';
   h.textContent=['💖','💗','💕','🌸','✨','💞'][Math.floor(Math.random()*6)];
   h.style.cssText=`left:${10+Math.random()*80}vw;top:${20+Math.random()*55}vh;font-size:${1+Math.random()*.8}rem;animation-duration:${1.4+Math.random()*.8}s;`;
-  document.body.appendChild(h); h.addEventListener('animationend',()=>h.remove());
+  document.body.appendChild(h);h.addEventListener('animationend',()=>h.remove());
 }
 
 /* ── CONFETTI ── */
@@ -385,7 +496,7 @@ function resizeCC(){cc.width=innerWidth;cc.height=innerHeight;} resizeCC(); wind
 let pieces=[];
 function launchConfetti(){
   const cols=['#f4a7c0','#e07899','#e8cc80','#c8e6c9','#ffffff','#ffd6e7','#b5ead7'];
-  for(let i=0;i<130;i++) pieces.push({x:Math.random()*innerWidth,y:-20,w:5+Math.random()*7,h:9+Math.random()*11,color:cols[Math.floor(Math.random()*cols.length)],vx:(Math.random()-.5)*3.2,vy:1.8+Math.random()*3.2,angle:Math.random()*360,spin:(Math.random()-.5)*6,alpha:1});
+  for(let i=0;i<140;i++) pieces.push({x:Math.random()*innerWidth,y:-20,w:5+Math.random()*7,h:9+Math.random()*11,color:cols[Math.floor(Math.random()*cols.length)],vx:(Math.random()-.5)*3.2,vy:1.8+Math.random()*3.2,angle:Math.random()*360,spin:(Math.random()-.5)*6,alpha:1});
   animConf();
 }
 function animConf(){
@@ -396,5 +507,3 @@ function animConf(){
 </script>
 </body>
 </html>
-
-
