@@ -330,7 +330,6 @@ h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(1.4rem
         <img id="confessPhoto" class="confession-photo" src="" alt="foto"/>
         <div class="letter-wrap">
           <div class="para" id="para1"></div>
-          <button class="para-btn" id="paraBtn" onclick="revealPara2()" style="display:none;">Lanjut baca… ✨</button>
           <div class="para" id="para2" style="display:none;"></div>
         </div>
         <p class="question" id="confessQuestion"></p>
@@ -496,7 +495,7 @@ function closePreview(){document.getElementById('previewModal').classList.remove
 let generatedLink='';
 let currentSender='', currentPhone='';
 
-function generateLink(){
+async function generateLink(){
   const sender  =document.getElementById('senderName').value.trim();
   const receiver=document.getElementById('receiverName').value.trim();
   const phone   =document.getElementById('phoneInput').value.trim();
@@ -516,15 +515,26 @@ function generateLink(){
 
   currentSender='62'+phone; currentPhone=phone;
 
+  // Compress photo further for URL (max 300px, quality 0.5)
+  let photoParam = '';
+  if(photoBase64){
+    const img2 = new Image();
+    await new Promise(res=>{img2.onload=res; img2.src=photoBase64;});
+    const c2=document.createElement('canvas');
+    const maxW2=300, scale2=Math.min(1,maxW2/img2.width);
+    c2.width=img2.width*scale2; c2.height=img2.height*scale2;
+    c2.getContext('2d').drawImage(img2,0,0,c2.width,c2.height);
+    photoParam=c2.toDataURL('image/jpeg',0.5);
+  }
+
   const base=window.location.href.split('?')[0];
   const params=new URLSearchParams({from:sender,to:receiver,phone:'62'+phone});
   if(m1) params.set('m1',m1);
   if(m2) params.set('m2',m2);
   if(yesLbl) params.set('yes',yesLbl);
   if(noLbl)  params.set('no',noLbl);
+  if(photoParam) params.set('photo',photoParam);
   if(useExp) params.set('exp',expVal);
-  // Store photo in sessionStorage keyed by sender name
-  if(photoBase64) sessionStorage.setItem('photo_'+sender, photoBase64);
 
   generatedLink=base+'?'+params.toString();
   document.getElementById('linkText').textContent=generatedLink;
@@ -626,17 +636,28 @@ function showConfession(){
   document.getElementById('btnYes').textContent=pYes||'💖 Iya, Mau!';
   document.getElementById('btnNo').textContent=pNo||'Enggak 🙈';
 
-  // Load photo from sessionStorage
-  const photo=sessionStorage.getItem('photo_'+pFrom);
-  if(photo){const img=document.getElementById('confessPhoto');img.src=photo;img.style.display='block';}
+  // Load photo from URL param (base64 encoded)
+  const pPhoto = P.get('photo');
+  if(pPhoto){
+    const img=document.getElementById('confessPhoto');
+    img.src=pPhoto; img.style.display='block';
+  }
 
   // WA link
   const waMsg=encodeURIComponent(`💖 YEAY!! Aku mau jadi orang spesialmu, ${pFrom}!\n\nTerima kasih sudah berani mengungkapkan perasaanmu 🥰\nAku senang banget! 🌸✨`);
   document.getElementById('waLink').href=`https://wa.me/${pPhone}?text=${waMsg}`;
 
-  // Progressive reveal
-  setTimeout(()=>document.getElementById('para1').classList.add('visible'),400);
-  setTimeout(()=>document.getElementById('paraBtn').style.display='block',1400);
+  // Auto progressive reveal — no button needed
+  setTimeout(()=>document.getElementById('para1').classList.add('visible'), 400);
+  setTimeout(()=>{
+    const p2=document.getElementById('para2');
+    p2.style.display='block';
+    setTimeout(()=>p2.classList.add('visible'),50);
+  }, 2400);
+  setTimeout(()=>{
+    document.getElementById('confessQuestion').classList.add('visible');
+    setTimeout(()=>document.getElementById('btnRow').classList.add('visible'),400);
+  }, 3500);
 
   /* NO button dodge */
   const btnNo=document.getElementById('btnNo'), btnRow=document.getElementById('btnRow');
@@ -659,16 +680,6 @@ function showConfession(){
 
   // Play music
   tryPlayMusic();
-}
-
-function revealPara2(){
-  document.getElementById('paraBtn').style.display='none';
-  const p2=document.getElementById('para2'); p2.style.display='block';
-  setTimeout(()=>p2.classList.add('visible'),50);
-  setTimeout(()=>{
-    document.getElementById('confessQuestion').classList.add('visible');
-    setTimeout(()=>document.getElementById('btnRow').classList.add('visible'),400);
-  },800);
 }
 
 /* ── YES ── */
